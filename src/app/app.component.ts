@@ -12,6 +12,15 @@ import { invoke } from "@tauri-apps/api/core";
 })
 export class AppComponent {
   greetingMessage = "";
+  value = "_";
+
+  load(value: number): void {
+    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+    invoke<string>("load", {value}).then((text) => {
+      this.value = text;
+      console.log(text);
+    });
+  }
 
   greet(event: SubmitEvent, name: string): void {
     event.preventDefault();
@@ -19,6 +28,8 @@ export class AppComponent {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
     invoke<string>("greet", { name }).then((text) => {
       this.greetingMessage = text;
+      console.log(text);
+      this.load(12);
     });
   }
 }
