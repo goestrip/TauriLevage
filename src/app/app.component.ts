@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { invoke } from "@tauri-apps/api/core";
+import {MatButtonModule} from '@angular/material/button';
 
 @Component({
     standalone: true,
     selector: 'app-root',
-    imports: [CommonModule, RouterOutlet],
+    imports: [CommonModule, MatButtonModule],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
@@ -16,7 +17,7 @@ export class AppComponent {
 
   load(value: number): void {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    invoke<string>("load", {value}).then((text) => {
+    invoke<string>("load_user", {value}).then((text) => {
       this.value = text;
       console.log(text);
     });
