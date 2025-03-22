@@ -1,8 +1,12 @@
 <main class="container">
-  <mat-toolbar-row>
-    <span>Second Line</span>
-    <span class="example-spacer"></span>
-    <mat-icon class="example-icon" aria-hidden="false" aria-label="Example user verified icon">verified_user</mat-icon>
+  <mat-toolbar-row class="toolbar-row">
+    <button mat-icon-button aria-label="Save" (click)="save()">
+      <mat-icon>save</mat-icon>
+    </button>
+    <span class="spacer"></span>
+    <button mat-icon-button aria-label="Settings" (click)="openSettings()">
+      <mat-icon>settings</mat-icon>
+    </button>
   </mat-toolbar-row>
   
   <app-nav-bar [tabPanel]="tabPanel"></app-nav-bar>
