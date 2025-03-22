@@ -7,6 +7,11 @@
   },
   "projects": {
     "helloworld": {
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
