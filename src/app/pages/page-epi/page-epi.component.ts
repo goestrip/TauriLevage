@@ -1,27 +1,90 @@
-import { Component } from '@angular/core';
-import {MatTableModule} from '@angular/material/table';
+import { Component, effect} from '@angular/core';
 
-class EpiData {
-  id: number = 0;
-  name: string = '' ;
-  description: string= '';
-}
+import {MatTableModule} from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, DatePipe } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+
+import { Epi } from '../../model/epi';
+import { DataModelService } from '../../services/data-model.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { EpiDataSource } from '../../services/dataSource';
+
+
+const COLUMNS_SCHEMA = [
+  {
+    key: "serial",
+    type: "text",
+    label: "numero de serie"
+  },
+  {
+    key: "date_fabrication",
+    type: "text",
+    label: "date_fabrication"
+  },
+  {
+    key: "occupation",
+    type: "text",
+    label: "Occupation"
+  },
+  {
+    key: "validite_years",
+    type: "number",
+    label: "Validite"
+  }
+]
 
 @Component({
   selector: 'app-page-epi',
-  imports: [MatTableModule],
+  imports: [MatTableModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatInputModule,
+    DatePipe,
+    MatIconModule,
+    CommonModule
+  ],
   templateUrl: './page-epi.component.html',
   styleUrl: './page-epi.component.scss'
 })
 export class PageEpiComponent {
 
-  columnsToDisplay:string[] = ['id', 'name'];
+   displayedColumns: string[] = [
+     'serial',
+     'nature',
+     'date_fabrication',
+     'date_mise_en_service',
+     'validite_years',
+     'validiteLimite',
+     'assignedTo',
+     'emplacement',
+   
+     'date_last_control',
+     'date_rebus',
+     'edition',
+    // 'anomalies',
+   ];
+   
 
-  epiData = [
-    { id: 1, name: 'Epi 1', description: 'Epi 1 description' },
-    { id: 2, name: 'Epi 2', description: 'Epi 2 description' },
-    { id: 3, name: 'Epi 3', description: 'Epi 3 description' },
-    { id: 4, name: 'Epi 4', description: 'Epi 4 description' },
-    { id: 5, name: 'Epi 5', description: 'Epi 5 description' },
-  ];
+  epiData: EpiDataSource;
+
+  constructor(private dataService: DataModelService) {
+    this.epiData = this.dataService.epiSource;
+  }
+
+
+  editEpi(epi: Epi) {
+    console.log(epi);
+  }
+
+  validityOverdue(epi: Epi): boolean {
+    return  new Date() >= epi.validiteLimite ;    
+  }
+  dateControl(epi: Epi): boolean {
+    epi.date_last_control
+    return true;
+  }
 }

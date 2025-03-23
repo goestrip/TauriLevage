@@ -3,38 +3,46 @@
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
 
+@include mat.tabs-overrides((
+  background-color: orange,
+  foreground-color: orange,
+  inactive-label-text-color: rgb(158, 168, 161),
+  active-hover-label-text-color: rgb(55, 106, 216),
+  
+  active-hover-indicator-color: rgb(216, 55, 203),
+));
+
 html {
   @include mat.theme((
     color: (
       theme-type: light,
-      primary: mat.$azure-palette,
+      primary: mat.$green-palette,
       tertiary: mat.$blue-palette,
+      use-system-variables: true
     ),
     typography: Roboto,
     density: 0,
   ));
-}
-html, body { height: 100%; }
-h2 {
-  font-size: 20px;
+ }
+// html, body { height: 100%; }
+// h2 {
+//   font-size: 20px;
   
-  margin: 4px;
-  color: var(--mat-primary-color);
-}
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: --mat-sys-primary;
-}
+//   margin: 4px;
+//   color: var(--mat-primary-color);
+// }
+// body {
+//   margin: 0;
+//   font-family: Roboto, "Helvetica Neue", sans-serif;
+//   background-color: --mat-sys-primary;
+// }
 
 // nav {
 //   background-color: mat.$primary-palette;
 //   color: mat.$primary-palette;
 // }
 
-a {
-  color: --mat-sys-primary;
-}
+
 
 // a.active {
 //   color: mat.$primary-palette;

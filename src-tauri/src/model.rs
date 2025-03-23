@@ -49,7 +49,7 @@ impl Serialize for Anomaly {
         s.serialize_field("id", &self.id)?;
         s.serialize_field("title", &self.title)?;
         s.serialize_field("description", &self.description)?;
-        s.serialize_field("criticity", &criticy)?;
+        //s.serialize_field("criticity", &criticy)?;
         s.serialize_field("is_handled", &self.is_handled)?;
         s.serialize_field("date_detection", &self.date_detection)?;
         s.serialize_field("date_resolution", &self.date_resolution)?;

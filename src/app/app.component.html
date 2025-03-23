@@ -4,6 +4,17 @@
       <mat-icon>save</mat-icon>
     </button>
     <span class="spacer"></span>
+    
+    <span style="font-size: larger;">Aujourd'hui: {{ today | date:'dd-MM-yyyy' }}</span>
+    
+    <span class="spacer"></span>
+
+    <button mat-icon-button aria-label="Add Line" (click)="addLine()">
+      <mat-icon>add</mat-icon>
+    </button>
+    
+    <span class="spacer"></span>
+    
     <button mat-icon-button aria-label="Settings" (click)="openSettings()">
       <mat-icon>settings</mat-icon>
     </button>

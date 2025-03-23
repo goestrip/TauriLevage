@@ -9,6 +9,7 @@ import {MatButtonModule} from '@angular/material/button';
 import { invoke } from "@tauri-apps/api/core";
 
 import { NavBarComponent } from './nav-bar/nav-bar.component';
+import { DataModelService } from './services/data-model.service';
 
 
 @Component({
@@ -29,6 +30,10 @@ export class AppComponent {
   links = ['page-epi', 'page-levage', 'third'];
   activeLink = this.links[0];
 
+  today: Date = new Date();
+
+  constructor(private dataService:DataModelService) { }
+
   ngOnInit(): void {
     console.log("init");
     invoke<string>("init_database", {}).then((text) => {
@@ -38,6 +43,10 @@ export class AppComponent {
 
   save(): void {
     console.log("save");
+  }
+
+  addLine(): void {
+    this.dataService.addEpi();
   }
   
   openSettings(): void {

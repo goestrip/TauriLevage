@@ -1,14 +1,70 @@
 <table mat-table [dataSource]="epiData">
-    <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef> Id </th>
-        <td mat-cell *matCellDef="let epi"> {{epi.id}} </td>
-    </ng-container>
+  <ng-container matColumnDef="serial">
+    <th mat-header-cell *matHeaderCellDef> num Serie </th>
+    <td mat-cell *matCellDef="let epi"> {{epi.serial}} </td>
+  </ng-container>
 
-    <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> name </th>
-        <td mat-cell *matCellDef="let epi"> {{epi.name}} </td>
-    </ng-container>
+  <ng-container matColumnDef="nature">
+    <th mat-header-cell *matHeaderCellDef> Nature </th>
+    <td mat-cell *matCellDef="let epi"> {{epi.nature.nature}} </td>
+  </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></tr>
+  <ng-container matColumnDef="date_fabrication">
+    <th mat-header-cell *matHeaderCellDef> Fabrication</th>
+    <td mat-cell *matCellDef="let epi"> {{epi.date_fabrication|  date:'dd-MM-yyyy' }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="date_mise_en_service">
+    <th mat-header-cell *matHeaderCellDef> Mise en service</th>
+    <td mat-cell *matCellDef="let epi"  >
+       {{epi.date_mise_en_service|  date:'dd-MM-yyyy' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="validite_years">
+    <th mat-header-cell *matHeaderCellDef>Durée validité</th>
+    <td mat-cell *matCellDef="let epi"> {{epi.validite_years}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="validiteLimite">
+    <th mat-header-cell *matHeaderCellDef>Valide jusqu'au</th>
+    <td mat-cell *matCellDef="let epi" [ngClass]="validityOverdue(epi)?'cell-red':''">
+       {{epi.validiteLimite|  date:'dd-MM-yyyy' }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="assignedTo">
+    <th mat-header-cell *matHeaderCellDef>Assignation</th>
+    <td mat-cell *matCellDef="let epi"> {{epi.assignedTo}} </td>
+  </ng-container>
+  
+  <ng-container matColumnDef="emplacement">
+    <th mat-header-cell *matHeaderCellDef>Emplacement</th>
+    <td mat-cell *matCellDef="let epi"> {{epi.emplacement}} </td>
+  </ng-container>
+  
+  <ng-container matColumnDef="date_last_control">
+    <th mat-header-cell *matHeaderCellDef>Date controle</th>
+    <td mat-cell *matCellDef="let epi"> {{epi.date_last_control|  date:'dd-MM-yyyy'}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="date_rebus">
+    <th mat-header-cell *matHeaderCellDef>Date rebus</th>
+    <td mat-cell *matCellDef="let epi"> {{epi.date_rebus|  date:'dd-MM-yyyy'}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="edition">
+    <th mat-header-cell *matHeaderCellDef>Edition</th>
+    <td mat-cell *matCellDef="let epi">
+      <button mat-icon-button (click)="editEpi(epi)">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+
+
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let myRowData; columns: displayedColumns"></tr>
 </table>
