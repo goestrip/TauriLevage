@@ -19,7 +19,7 @@ export class DataModelService {
    }
 
    public addEpi(){
-    this.epis.push(new Epi());
+    this.epis.unshift(new Epi());
     this.epiSource.data = this.epis;
    }
 

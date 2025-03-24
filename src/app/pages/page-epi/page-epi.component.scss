@@ -11,3 +11,13 @@
     background-color: rgb(218, 54, 54);
     color: rgb(243, 243, 243);
   }
+
+  .table-container {
+    max-height: 400px; /* Adjust the height as needed */
+    overflow: auto;
+  }
+  
+  .mat-header-row {
+    background: white; /* Ensure the header row has a background color */
+    z-index: 1; /* Ensure the header row is above other rows */
+  }

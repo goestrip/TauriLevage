@@ -20,9 +20,11 @@
     </button>
   </mat-toolbar-row>
   
-  <app-nav-bar [tabPanel]="tabPanel"></app-nav-bar>
+  <app-nav-bar [tabPanel]="tabPanel" class="app-nav-bar"></app-nav-bar>
   
-  <mat-tab-nav-panel #tabPanel>
-    <router-outlet></router-outlet>
-  </mat-tab-nav-panel>
+  <div class="scrollable-content">
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet></router-outlet>
+    </mat-tab-nav-panel>
+  </div>
 </main>
