@@ -11,9 +11,11 @@
 .toolbar-row {
   position: fixed;
   top: 0;
-  width: 100%;
+  width: 98%;
+  margin: 2px;
+  padding-left: 2%;
   z-index: 1000;
-
+  height: 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,5 +46,6 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
+ 
 }
 

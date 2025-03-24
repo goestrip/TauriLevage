@@ -1,16 +1,13 @@
 <main class="container">
   <mat-toolbar-row class="toolbar-row">
-    <button mat-icon-button aria-label="Save" (click)="save()">
-      <mat-icon>save</mat-icon>
-    </button>
-    <span class="spacer"></span>
     
     <span style="font-size: larger;">Aujourd'hui: {{ today | date:'dd-MM-yyyy' }}</span>
     
     <span class="spacer"></span>
 
-    <button mat-icon-button aria-label="Add Line" (click)="addLine()">
+    <button mat-stroked-button (click)="addLine()">
       <mat-icon>add</mat-icon>
+      Nouvelle ligne
     </button>
     
     <span class="spacer"></span>

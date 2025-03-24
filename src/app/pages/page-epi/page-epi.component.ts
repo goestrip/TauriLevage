@@ -68,7 +68,8 @@ export class PageEpiComponent {
    
      'date_last_control',
      'date_rebus',
-    // 'anomalies',
+     'anomaly_name',
+     'anomaly_criticity',
    ];
    
   private _liveAnnouncer = inject(LiveAnnouncer);
@@ -92,8 +93,12 @@ export class PageEpiComponent {
   }
 
   validityOverdue(epi: Epi): boolean {
+    if (!epi.validiteLimite) {
+      return false;
+    }
     return  new Date() >= epi.validiteLimite ;    
   }
+  
   dateControl(epi: Epi): boolean {
     epi.date_last_control
     return true;

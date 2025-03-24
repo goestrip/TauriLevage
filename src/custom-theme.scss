@@ -21,7 +21,7 @@ html {
       use-system-variables: true
     ),
     typography: Roboto,
-    density: 0,
+    density: -1,
   ));
  }
 // html, body { height: 100%; }
@@ -31,11 +31,12 @@ html {
 //   margin: 4px;
 //   color: var(--mat-primary-color);
 // }
-// body {
-//   margin: 0;
-//   font-family: Roboto, "Helvetica Neue", sans-serif;
-//   background-color: --mat-sys-primary;
-// }
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: --mat-sys-primary;
+}
 
 // nav {
 //   background-color: mat.$primary-palette;

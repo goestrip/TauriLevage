@@ -1,4 +1,4 @@
-import { Anomaly } from "./anomaly";
+import { Anomaly, GenerateRandomAnomaly } from "./anomaly";
 import { Emplacement } from "./emplacement";
 import { EpiMateriel } from "./catalogMateriel";
 import { People } from "./people";
@@ -22,17 +22,31 @@ export class Epi{
     public id: number = 0;
     public nature: EpiMateriel = new EpiMateriel();
     public serial: string = uuidv4().toString().slice(0, 8);
-    public date_fabrication: Date = getRandomDate(new Date(2014, 0, 1), new Date(2021, 0, 1));
-    public date_mise_en_service: Date = getRandomDate(new Date(2021, 0, 1));
+    public date_fabrication: Date | undefined ;
+    public date_mise_en_service: Date | undefined;
     public validite_years: number = 10;
-    public validiteLimite: Date = new Date(this.date_fabrication.getTime() + this.validite_years *YEAR_TO_MS);
+    public validiteLimite: Date | undefined;
     public assignedTo: People|null = null;
     public emplacement: Emplacement|null = null;
 
     public date_last_control: Date|null = null;
     public date_rebus: Date|null = null;
 
-    public anomalies: Anomaly[] = [];
-    
-   
+    public anomaly: Anomaly |null = null;
+}
+
+export function GenerateRandomEpi():Epi{
+    const epi = new Epi();
+    epi.nature = new EpiMateriel();
+    epi.serial = uuidv4().toString().slice(0, 8);
+    epi.date_fabrication = getRandomDate(new Date(2014, 0, 1), new Date(2021, 0, 1));
+    epi.date_mise_en_service = getRandomDate(new Date(2021, 0, 1));
+    epi.validite_years = Math.floor(Math.random() * 4) + 6;
+    epi.validiteLimite = new Date(epi.date_fabrication.getTime() + epi.validite_years *YEAR_TO_MS);
+    epi.assignedTo = null;
+    epi.emplacement = null;
+    epi.date_last_control = getRandomDate(new Date(2023, 0, 1));
+    epi.date_rebus = null;
+    epi.anomaly = GenerateRandomAnomaly();
+    return epi;
 }

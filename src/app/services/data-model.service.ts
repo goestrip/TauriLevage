@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Epi } from '../model/epi';
+import { Epi, GenerateRandomEpi } from '../model/epi';
 import { EpiDataSource } from './dataSource';
 import { MatTableDataSource } from '@angular/material/table';
 
@@ -14,12 +14,12 @@ export class DataModelService {
 
   constructor() {
     for(let i= 0 ; i < 15; i++) {
-      this.epis.push(new Epi());
+      this.epis.push(GenerateRandomEpi());
     }
    }
 
    public addEpi(){
-    this.epis.unshift(new Epi());
+    this.epis.unshift(GenerateRandomEpi());
     this.epiSource.data = this.epis;
    }
 
