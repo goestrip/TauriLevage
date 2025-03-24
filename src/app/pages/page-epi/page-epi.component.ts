@@ -1,6 +1,8 @@
-import { Component, effect} from '@angular/core';
+import { Component, effect, inject, ViewChild} from '@angular/core';
 
-import {MatTableModule} from '@angular/material/table';
+import {LiveAnnouncer} from '@angular/cdk/a11y';
+import {MatSort, Sort, MatSortModule} from '@angular/material/sort';
+import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -45,7 +47,8 @@ const COLUMNS_SCHEMA = [
     MatInputModule,
     DatePipe,
     MatIconModule,
-    CommonModule
+    CommonModule,
+    MatSortModule 
   ],
   templateUrl: './page-epi.component.html',
   styleUrl: './page-epi.component.scss'
@@ -53,6 +56,7 @@ const COLUMNS_SCHEMA = [
 export class PageEpiComponent {
 
    displayedColumns: string[] = [
+     'edition',
      'serial',
      'nature',
      'date_fabrication',
@@ -64,15 +68,22 @@ export class PageEpiComponent {
    
      'date_last_control',
      'date_rebus',
-     'edition',
     // 'anomalies',
    ];
    
+  private _liveAnnouncer = inject(LiveAnnouncer);
 
-  epiData: EpiDataSource;
+  epiData: MatTableDataSource<Epi>;
+ 
+  @ViewChild(MatSort) sort: MatSort | null = null;
 
   constructor(private dataService: DataModelService) {
     this.epiData = this.dataService.epiSource;
+  }
+
+  
+  ngAfterViewInit() {
+    this.epiData.sort = this.sort;
   }
 
 
@@ -86,5 +97,17 @@ export class PageEpiComponent {
   dateControl(epi: Epi): boolean {
     epi.date_last_control
     return true;
+  }
+
+  announceSortChange(sortState: Sort) {
+    // This example uses English messages. If your application supports
+    // multiple language, you would internationalize these strings.
+    // Furthermore, you can customize the message to add additional
+    // details about the values being sorted.
+    if (sortState.direction) {
+      this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+    } else {
+      this._liveAnnouncer.announce('Sorting cleared');
+    }
   }
 }

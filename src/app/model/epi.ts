@@ -21,7 +21,7 @@ const YEAR_TO_MS = 365 * 24 * 60 * 60 * 1000;
 export class Epi{
     public id: number = 0;
     public nature: EpiMateriel = new EpiMateriel();
-    public serial: string = uuidv4();
+    public serial: string = uuidv4().toString().slice(0, 8);
     public date_fabrication: Date = getRandomDate(new Date(2014, 0, 1), new Date(2021, 0, 1));
     public date_mise_en_service: Date = getRandomDate(new Date(2021, 0, 1));
     public validite_years: number = 10;
