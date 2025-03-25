@@ -5,14 +5,13 @@ import { People } from "./people";
 import { v4 as uuidv4 } from 'uuid';
  
 function getRandomDate(start: Date, end:Date|null = null): Date {
-//const start = new Date(2020, 0, 1);
 if(end === null){
     end = new Date();
 }
-const startTime = start.getTime();
-const endTime = end.getTime();
-const randomTime = new Date(startTime + Math.random() * (endTime - startTime));
-return randomTime;
+    const startTime = start.getTime();
+    const endTime = end.getTime();
+    const randomTime = new Date(startTime + Math.random() * (endTime - startTime));
+    return randomTime;
 }
 
 const YEAR_TO_MS = 365 * 24 * 60 * 60 * 1000;
@@ -46,7 +45,7 @@ export function GenerateRandomEpi():Epi{
     epi.assignedTo = null;
     epi.emplacement = null;
     epi.date_last_control = getRandomDate(new Date(2023, 0, 1));
-    epi.date_rebus = null;
+    epi.date_rebus = Math.random() < 0.4 ? epi.date_last_control  : null;
     epi.anomaly = GenerateRandomAnomaly();
     return epi;
 }

@@ -14,6 +14,7 @@ import { DataModelService } from '../../services/data-model.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EpiDataSource } from '../../services/dataSource';
+import { Criticity } from '../../model/criticity';
 
 
 const COLUMNS_SCHEMA = [
@@ -115,4 +116,28 @@ export class PageEpiComponent {
       this._liveAnnouncer.announce('Sorting cleared');
     }
   }
+
+  isRebus(epi: Epi): boolean {
+    return epi.date_rebus !== null;
+  }
+
+  isRowRebus(rowData: any): boolean{
+    console.log(rowData);
+    return Math.random() < 0.5;
+    
+  }
+
+  getCriticityClass(epi: any): string {
+    switch (epi.anomaly?.criticity) {
+      case Criticity.NORMAL:
+        return 'class-normal';
+      case Criticity.URGENT:
+        return 'class-urgent';
+      case Criticity.CRITICAL:
+        return 'class-critical';
+      default:
+        return '';
+    }
+  }
+  
 }

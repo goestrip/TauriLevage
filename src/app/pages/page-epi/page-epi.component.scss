@@ -21,3 +21,24 @@
     background: white; /* Ensure the header row has a background color */
     z-index: 1; /* Ensure the header row is above other rows */
   }
+
+  .class-normal{
+    background-color: rgb(255, 255, 255);
+  }
+
+  .class-urgent{
+    background-color: rgb(241, 163, 17);
+    color: rgb(243, 243, 243);
+  }
+  .class-critical{
+    background-color: rgb(218, 54, 54);
+    color: rgb(243, 243, 243);
+  }
+  .class-rebus{
+    //background-color: rgb(218, 54, 54);
+    color: rgb(255, 98, 98);
+  }
+  .class-row-rebus{
+    color: rgb(169, 169, 169);
+
+  }

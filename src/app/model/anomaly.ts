@@ -5,9 +5,12 @@ export class Anomaly{
     public title: string = '';
     public description: string = '';
     public criticity: Criticity = Criticity.NONE;
-    public isHandled: boolean = false;
     public date_detection: Date = new Date();
     public date_resolution: Date|null = null;
+    
+    public get isHandled(): boolean {
+        return this.date_resolution !== null;
+    }
 }
 
 export function GenerateRandomAnomaly():Anomaly|null{
@@ -20,7 +23,6 @@ export function GenerateRandomAnomaly():Anomaly|null{
     anomaly.title = 'Anomaly ' + Math.floor(Math.random() * 1000);
     anomaly.description = 'Description ' + Math.floor(Math.random() * 1000);
     anomaly.criticity = RandomCriticity();
-    anomaly.isHandled = Math.random() > 0.5;
     anomaly.date_detection = new Date();
     anomaly.date_resolution = null;
     return anomaly;
