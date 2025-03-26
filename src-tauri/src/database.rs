@@ -1,4 +1,6 @@
-use rusqlite::{params, Connection, Result};
+use rusqlite::{Connection, Result};
+
+use crate::model::EpiMateriel;
 
 //open a sqlite db
 pub fn open_db()-> Result<Connection> {
@@ -43,11 +45,12 @@ pub fn init_db(connection: &Connection)-> Result<()> {
     connection.execute(
         "CREATE TABLE IF NOT EXISTS epi_materiel (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            category TEXT NOT NULL
+            nature TEXT NOT NULL            
         )",
         [],
     )?;
+
+
 
     // Create table for epi
     connection.execute(
@@ -72,3 +75,15 @@ pub fn init_db(connection: &Connection)-> Result<()> {
     Ok(())
 }
 
+pub fn get_all_epi_materiel(connection: &Connection) -> Result<Vec<EpiMateriel>> {
+    let mut stmt = connection.prepare("SELECT id, nature FROM epi_materiel")?;
+    let epi_materiel_iter = stmt.query_map([], |row| {
+        Ok(EpiMateriel{
+           id : row.get(0)?,
+           nature: row.get(1)?
+        })
+    })?;
+
+
+    Ok(epi_materiel_iter.collect::<Result<Vec<EpiMateriel>>>()?)
+}

@@ -12,16 +12,32 @@
   active-hover-indicator-color: rgb(216, 55, 203),
 ));
 
+// @include mat.datepicker-overrides((
+//   calendar-date-selected-state-text-color: orange,
+//   calendar-date-selected-state-background-color: rgb(65, 119, 65),
+//   calendar-container-text-color: rgb(65, 172, 97),
+//   calendar-text-size: 1em,
+// ));
+
+// @include mat.form-field-overrides((
+//   filled-caret-color: rgb(218, 218, 218),
+//   filled-focus-active-indicator-color: red,
+//   container-height: 1em,
+//   container-vertical-padding: 1.5em,
+//   filled-with-label-container-padding-top: 5px,
+// ));
+
 html {
+  color-scheme: light dark;
   @include mat.theme((
     color: (
-      theme-type: light,
+      
       primary: mat.$green-palette,
       tertiary: mat.$blue-palette,
       use-system-variables: true
     ),
     typography: Roboto,
-    density: -1,
+    density: -3,
   ));
  }
 // html, body { height: 100%; }

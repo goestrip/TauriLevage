@@ -4,7 +4,7 @@
       {
         "label": "ui:dev",
         "type": "shell",
-        "isBackground": true,
+        "isBackground": false,
         "command": "npm",
         "args": [
           "start"

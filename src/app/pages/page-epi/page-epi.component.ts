@@ -5,9 +5,11 @@ import {MatSort, Sort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
+import {MatDatepickerModule} from '@angular/material/datepicker';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatOptionModule } from '@angular/material/core';
 
 import { Epi } from '../../model/epi';
 import { DataModelService } from '../../services/data-model.service';
@@ -15,6 +17,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EpiDataSource } from '../../services/dataSource';
 import { Criticity } from '../../model/criticity';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { EpiMateriel } from '../../model/catalogMateriel';
 
 
 const COLUMNS_SCHEMA = [
@@ -49,8 +53,11 @@ const COLUMNS_SCHEMA = [
     DatePipe,
     MatIconModule,
     CommonModule,
-    MatSortModule 
+    MatSortModule ,
+    MatDatepickerModule,
+    MatOptionModule
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './page-epi.component.html',
   styleUrl: './page-epi.component.scss'
 })
@@ -76,11 +83,20 @@ export class PageEpiComponent {
   private _liveAnnouncer = inject(LiveAnnouncer);
 
   epiData: MatTableDataSource<Epi>;
+  epiMateriel: EpiMateriel[] = [];
+
+  editingRow: any = null;
+
  
   @ViewChild(MatSort) sort: MatSort | null = null;
 
   constructor(private dataService: DataModelService) {
     this.epiData = this.dataService.epiSource;
+
+    effect(() => {
+      this.epiMateriel = this.dataService.materiels();
+
+    });
   }
 
   
@@ -88,9 +104,18 @@ export class PageEpiComponent {
     this.epiData.sort = this.sort;
   }
 
-
-  editEpi(epi: Epi) {
-    console.log(epi);
+  toggleEditRow(epi: any): void {
+    if(this.editingRow === epi) {
+      this.editingRow = null;
+      this.saveRow(epi);
+    } else {
+      this.editingRow = epi;
+    }
+  }
+  saveRow(epi: any): void {
+    // Implement your save logic here
+    this.editingRow = null;
+    this.dataService.saveEpi(epi);
   }
 
   validityOverdue(epi: Epi): boolean {

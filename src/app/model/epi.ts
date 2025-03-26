@@ -25,7 +25,7 @@ export class Epi{
     public date_mise_en_service: Date | undefined;
     public validite_years: number = 10;
     public validiteLimite: Date | undefined;
-    public assignedTo: People|null = null;
+    public assigned_to: People|null = null;
     public emplacement: Emplacement|null = null;
 
     public date_last_control: Date|null = null;
@@ -42,7 +42,7 @@ export function GenerateRandomEpi():Epi{
     epi.date_mise_en_service = getRandomDate(new Date(2021, 0, 1));
     epi.validite_years = Math.floor(Math.random() * 4) + 6;
     epi.validiteLimite = new Date(epi.date_fabrication.getTime() + epi.validite_years *YEAR_TO_MS);
-    epi.assignedTo = null;
+    epi.assigned_to = null;
     epi.emplacement = null;
     epi.date_last_control = getRandomDate(new Date(2023, 0, 1));
     epi.date_rebus = Math.random() < 0.4 ? epi.date_last_control  : null;

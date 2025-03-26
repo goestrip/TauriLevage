@@ -1,4 +1,4 @@
-import { Component , OnInit} from '@angular/core';
+import { Component , inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,8 @@ import { invoke } from "@tauri-apps/api/core";
 
 import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { DataModelService } from './services/data-model.service';
+import { MatDialog } from '@angular/material/dialog';
+import { SettingsComponent } from './settings/settings.component';
 
 
 @Component({
@@ -29,7 +31,7 @@ export class AppComponent {
 
   links = ['page-epi', 'page-levage', 'third'];
   activeLink = this.links[0];
-
+  readonly dialog = inject(MatDialog);
   today: Date = new Date();
 
   constructor(private dataService:DataModelService) { }
@@ -50,7 +52,9 @@ export class AppComponent {
   }
   
   openSettings(): void {
-    console.log("openSettings");
+    const dialogRef = this.dialog.open(SettingsComponent);
+
+
   }
 
 }
