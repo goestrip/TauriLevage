@@ -1,0 +1,80 @@
+<h2>{{ formTitle }}</h2>
+<form [formGroup]="epiForm" (ngSubmit)="onSubmit()">
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Serial Number</mat-label>
+      <input matInput formControlName="serialNumber" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nature</mat-label>
+      <mat-select formControlName="nature">
+        <mat-option *ngFor="let item of epiMaterielList" [value]="item">
+          {{ item.nature }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date de fabrication</mat-label>
+      <input matInput [matDatepicker]="fabricationPicker" formControlName="fabricationDate" />
+      <mat-datepicker-toggle matSuffix [for]="fabricationPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fabricationPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Mise en service</mat-label>
+      <input matInput [matDatepicker]="activationPicker" formControlName="activationDate" />
+      <mat-datepicker-toggle matSuffix [for]="activationPicker"></mat-datepicker-toggle>
+      <mat-datepicker #activationPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Durée Validité (années)</mat-label>
+      <input matInput type="number" formControlName="validiteYears" min="0" max="100" step="1" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Valide Jusqu'au</mat-label>
+      <input matInput [matDatepicker]="validityPicker" formControlName="validiteLimite" />
+      <mat-datepicker-toggle matSuffix [for]="validityPicker"></mat-datepicker-toggle>
+      <mat-datepicker #validityPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Assignation</mat-label>
+      <input matInput formControlName="assignedTo" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Emplacement</mat-label>
+      <input matInput formControlName="emplacement" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date dernier Contrôle</mat-label>
+      <input matInput [matDatepicker]="controlPicker" formControlName="dateLastControl" />
+      <mat-datepicker-toggle matSuffix [for]="controlPicker"></mat-datepicker-toggle>
+      <mat-datepicker #controlPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date Rebus (Discard Date)</mat-label>
+      <input matInput [matDatepicker]="rebusPicker" formControlName="dateRebus" />
+      <mat-datepicker-toggle matSuffix [for]="rebusPicker"></mat-datepicker-toggle>
+      <mat-datepicker #rebusPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Anomalie (Anomaly)</mat-label>
+      <input matInput formControlName="anomalyName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Criticité (Criticity)</mat-label>
+      <input matInput formControlName="anomalyCriticity" />
+    </mat-form-field>
+  </div>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="!epiForm.valid">Submit</button>
+</form>

@@ -19,7 +19,7 @@ const YEAR_TO_MS = 365 * 24 * 60 * 60 * 1000;
 
 export class Epi{
     public id: number = 0;
-    public nature: EpiMateriel = new EpiMateriel();
+    public nature: EpiMateriel | null = null;
     public serial: string = uuidv4().toString().slice(0, 8);
     public date_fabrication: Date | undefined ;
     public date_mise_en_service: Date | undefined;
@@ -36,7 +36,7 @@ export class Epi{
 
 export function GenerateRandomEpi():Epi{
     const epi = new Epi();
-    epi.nature = new EpiMateriel();
+    epi.nature = new EpiMateriel(1, "stop chute");
     epi.serial = uuidv4().toString().slice(0, 8);
     epi.date_fabrication = getRandomDate(new Date(2014, 0, 1), new Date(2021, 0, 1));
     epi.date_mise_en_service = getRandomDate(new Date(2021, 0, 1));

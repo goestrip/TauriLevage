@@ -2,6 +2,7 @@
 mod commands;
 mod model;
 mod database;
+mod test;
 
 
 

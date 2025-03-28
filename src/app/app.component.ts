@@ -12,6 +12,7 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { DataModelService } from './services/data-model.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsComponent } from './settings/settings.component';
+import { FormEpiComponent } from './forms/form-epi/form-epi.component';
 
 
 @Component({
@@ -48,7 +49,15 @@ export class AppComponent {
   }
 
   addLine(): void {
-    this.dataService.addEpi();
+    let dialogRef = this.dialog.open(FormEpiComponent, {
+        data: { formTitle: 'epi' } // Pass 'epi' as the form title
+    });
+
+    dialogRef.afterClosed().subscribe((updatedEpi) => {
+      if (updatedEpi) {
+        this.dataService.addEpi(updatedEpi);
+      }
+    });
   }
   
   openSettings(): void {

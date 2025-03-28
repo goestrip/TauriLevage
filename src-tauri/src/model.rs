@@ -60,20 +60,8 @@ pub struct EpiMateriel {
     pub nature: String,
     
 }
-// impl Serialize for EpiMateriel {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         let mut s = serializer.serialize_struct("EpiMateriel", 2)?;
-//         s.serialize_field("id", &self.id)?;
-//         s.serialize_field("name", &self.name)?;
-//         s.serialize_field("category", &self.category)?;
-//         s.end()
-//     }
-// }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct People {
     // Define the fields for People
     // Example:
