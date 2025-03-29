@@ -1,74 +1,63 @@
 use std::io::{self, Write};
+use tauri::State;
 
-use chrono::NaiveDate;
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-
-use crate::{database, model::{Epi, EpiMateriel}};
-
-
-// Define the User struct
-struct User {
-    name: String,
-    age: i32,
-}
-
-impl Serialize for User {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut s = serializer.serialize_struct("User", 2)?;
-        s.serialize_field("name", &self.name)?;
-        s.serialize_field("age", &self.age)?;
-        s.end()
-    }
-}
-
+use crate::{database, model::Epi, state::AppConfigData};
 
 #[tauri::command]
-pub fn init_database() -> Result<String, String> {
-    let connection = database::open_db().map_err(|e| e.to_string())?;
+pub fn init_database(state: State<AppConfigData>) -> Result<String, String> {
+    state.load_ini().map_err(|e| e.to_string())?;
+    let db_path = state.db_path.lock().unwrap().clone();
+
+    let connection = database::open_db(&db_path).map_err(|e| e.to_string())?;
     database::init_db(&connection).map_err(|e| e.to_string())?;
+    *state.connection.lock().unwrap() = Some(connection);
+
+    log::info!("Database initialized at {}", db_path);
     Ok("Database initialized".to_string())
 }
 
-
-// #[tauri::command]
-// pub fn load_epi() -> String {
-//     let test_epi = Epi {
-//         id: 1,
-//         nature: EpiMateriel{
-//             id: 1,
-//             nature: "test".to_string(),
-//         },
-//         serial: "test".to_string(),
-//         date_mise_en_service: NaiveDate::from_ymd_opt(2021, 1, 1).unwrap(),
-//         date_fabrication: NaiveDate::from_ymd_opt(2021, 1, 1).unwrap(),
-//         validite_years: 10,
-//         date_last_control: None,
-//         date_rebus: None,
-//         assigned_to: None,
-//         emplacement: None,
-//         anomaly: None,
-//     };
-//     serde_json::to_string(&test_epi).unwrap()
-// }
-
 #[tauri::command]
-pub fn save_epi(epi: String)-> String {
-    print!("{}", epi);
-    io::stdout().flush().expect("Unable to flush stdout");
-
+pub fn save_epi(state: State<AppConfigData>, epi: String) -> String {
     let epi_parsed: Epi = serde_json::from_str(&epi).unwrap();
-    // println!("{:?}", epi_parsed);
+
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        eprintln!("Database connection is None");
+        return "Database connection is None".to_string();
+    }
+    let saved = database::save_epi(&connection, &epi_parsed);
+    match saved {
+        Ok(_) => {
+            println!("Epi saved");
+            io::stdout().flush().expect("Unable to flush stdout");
+        }
+        Err(e) => eprintln!("Error saving epi: {}", e),
+    }
+
     serde_json::to_string(&epi_parsed).unwrap()
 }
 
 #[tauri::command]
-pub fn get_epi_materiel()-> Result<String, String>{
-    let connection = database::open_db().map_err(|e| e.to_string())?;
+pub fn get_epi_materiel(state: State<AppConfigData>) -> Result<String, String> {
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        return Err("No Database connection ".to_string());
+    }
+
     let epi_materiel = database::get_all_epi_materiel(&connection).map_err(|e| e.to_string())?;
 
     Ok(serde_json::to_string(&epi_materiel).unwrap())
 }
 
+#[tauri::command]
+pub fn get_epi(state: State<AppConfigData>) -> Result<String, String> {
+    log::info!("get_epi");
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("No Database connection in state");
+        return Err("No Database connection ".to_string());
+    }
+    let epi = database::get_all_epi(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&epi).unwrap())
+}

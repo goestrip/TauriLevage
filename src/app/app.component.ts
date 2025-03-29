@@ -38,10 +38,7 @@ export class AppComponent {
   constructor(private dataService:DataModelService) { }
 
   ngOnInit(): void {
-    console.log("init");
-    invoke<string>("init_database", {}).then((text) => {
-      console.log(text);
-    });
+    
   }
 
   save(): void {
@@ -54,6 +51,8 @@ export class AppComponent {
     });
 
     dialogRef.afterClosed().subscribe((updatedEpi) => {
+      console.log("dialog closed, updatedEpi", updatedEpi);
+      
       if (updatedEpi) {
         this.dataService.addEpi(updatedEpi);
       }

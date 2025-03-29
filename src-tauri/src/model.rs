@@ -1,21 +1,18 @@
-use chrono::{DateTime, Local, NaiveDate};
-use serde::{Serialize, Deserialize};
-
+use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Criticity {
-    None ,
-    Low ,
+    None,
+    Low,
     Medium,
-    High ,
+    High,
 }
 impl Default for Criticity {
     fn default() -> Self {
         Criticity::None
     }
 }
-
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Anomaly {
@@ -41,8 +38,6 @@ impl Default for Anomaly {
     }
 }
 
-
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Emplacement {
     // Define the fields for Emplacement
@@ -51,14 +46,12 @@ pub struct Emplacement {
     pub location: String,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EpiMateriel {
     // Define the fields for EpiMateriel
     // Example:
     pub id: i32,
     pub nature: String,
-    
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -70,19 +63,17 @@ pub struct People {
     pub nom: String,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Epi {
-    pub id: i32,
-    pub nature: EpiMateriel,
+    pub id: Option<i32>,
+    pub nature_id: i32,
     pub serial: String,
-    pub date_mise_en_service: DateTime<Local>,
-    pub date_fabrication: DateTime<Local>,
+    pub date_mise_en_service: i64, //timestamp
+    pub date_fabrication: i64,     //timestamp
     pub validite_years: i32,
-    pub assigned_to: Option<People>,
-    pub emplacement: Option<Emplacement>,
+    pub assigned_to_id: Option<People>,
+    pub emplacement_id: Option<Emplacement>,
     pub date_last_control: Option<NaiveDate>,
     pub date_rebus: Option<NaiveDate>,
-    pub anomaly: Option<Anomaly>,
+    pub anomaly_id: Option<Anomaly>,
 }
-

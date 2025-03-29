@@ -72,8 +72,9 @@ export class FormEpiComponent implements OnInit {
 
     if (fabricationDate && validiteYears >= 0) {
       const fabrication = new Date(fabricationDate);
-      const validiteLimite = new Date(fabrication.setFullYear(fabrication.getFullYear() + validiteYears));
-      this.epiForm.get('validiteLimite')?.setValue(validiteLimite.toISOString().split('T')[0]);
+      const validiteLimite = Epi.ComputeValiditeLimite(fabrication, validiteYears);
+      if(validiteLimite)
+        this.epiForm.get('validiteLimite')?.setValue(validiteLimite.toISOString().split('T')[0]);
     } else {
       this.epiForm.get('validiteLimite')?.setValue('');
     }
@@ -92,7 +93,7 @@ export class FormEpiComponent implements OnInit {
         assignedTo: this.epiForm.get('assignedTo')?.value,
         emplacement: this.epiForm.get('emplacement')?.value,
         date_last_control: this.epiForm.get('dateLastControl')?.value,
-        date_rebus: this.epiForm.get('dateRebus')?.value,
+        date_rebus: this.epiForm.get('dateRebus')?.value ? new Date(this.epiForm.get('dateRebus')?.value) : null,
         anomaly: {
           title: this.epiForm.get('anomalyName')?.value,
           criticity: this.epiForm.get('anomalyCriticity')?.value

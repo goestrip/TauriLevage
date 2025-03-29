@@ -24,14 +24,25 @@ export class Epi{
     public date_fabrication: Date | undefined ;
     public date_mise_en_service: Date | undefined;
     public validite_years: number = 10;
-    public validiteLimite: Date | undefined;
+    public get validiteLimite(): Date | undefined{
+        if(this.date_fabrication){
+            return Epi.ComputeValiditeLimite( this.date_fabrication, this.validite_years);
+        }
+        return undefined;
+    }
     public assigned_to: People|null = null;
     public emplacement: Emplacement|null = null;
 
     public date_last_control: Date|null = null;
     public date_rebus: Date|null = null;
-
     public anomaly: Anomaly |null = null;
+
+    public static ComputeValiditeLimite(date_fabrication: Date | undefined, validite_years: number): Date | undefined {
+        if(date_fabrication){
+            return new Date(date_fabrication.getTime() + validite_years * YEAR_TO_MS);
+        }
+        return undefined;
+    }
 }
 
 export function GenerateRandomEpi():Epi{
@@ -41,7 +52,6 @@ export function GenerateRandomEpi():Epi{
     epi.date_fabrication = getRandomDate(new Date(2014, 0, 1), new Date(2021, 0, 1));
     epi.date_mise_en_service = getRandomDate(new Date(2021, 0, 1));
     epi.validite_years = Math.floor(Math.random() * 4) + 6;
-    epi.validiteLimite = new Date(epi.date_fabrication.getTime() + epi.validite_years *YEAR_TO_MS);
     epi.assigned_to = null;
     epi.emplacement = null;
     epi.date_last_control = getRandomDate(new Date(2023, 0, 1));

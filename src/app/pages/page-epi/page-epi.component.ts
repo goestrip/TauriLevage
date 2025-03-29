@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatOptionModule } from '@angular/material/core';
+import { MatDialog } from '@angular/material/dialog';
+import { FormEpiComponent } from '../../forms/form-epi/form-epi.component';
 
 import { Epi } from '../../model/epi';
 import { DataModelService } from '../../services/data-model.service';
@@ -104,18 +106,23 @@ export class PageEpiComponent {
     this.epiData.sort = this.sort;
   }
 
+  readonly dialog = inject(MatDialog); // Inject MatDialog
+
   toggleEditRow(epi: any): void {
-    if(this.editingRow === epi) {
-      this.editingRow = null;
-      this.saveRow(epi);
-    } else {
-      this.editingRow = epi;
-    }
+    const dialogRef = this.dialog.open(FormEpiComponent, {
+      data: { formTitle: 'Edit EPI', epi: epi } // Pass the EPI to the dialog
+    });
+
+    dialogRef.afterClosed().subscribe((updatedEpi: Epi) => {
+      if (updatedEpi) {
+        Object.assign(epi, updatedEpi); // Update the EPI with the changes
+        this.saveRow(epi); // Save the updated EPI
+      }
+    });
   }
+
   saveRow(epi: any): void {
-    // Implement your save logic here
-    this.editingRow = null;
-    this.dataService.saveEpi(epi);
+    this.dataService.saveEpi(epi); // Save the EPI to the data service
   }
 
   validityOverdue(epi: Epi): boolean {

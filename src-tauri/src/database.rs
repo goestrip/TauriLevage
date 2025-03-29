@@ -1,15 +1,14 @@
-use rusqlite::{Connection, Result};
+use rusqlite::{named_params, Connection, Result};
 
-use crate::model::EpiMateriel;
+use crate::model::{Epi, EpiMateriel};
 
 //open a sqlite db
-pub fn open_db()-> Result<Connection> {
-    let path = "test.db";
+pub fn open_db(path: &str) -> Result<Connection> {
     let connection = Connection::open(path)?;
     return Ok(connection);
 }
 
-pub fn init_db(connection: &Connection)-> Result<()> {
+pub fn init_db(connection: &Connection) -> Result<()> {
     connection.execute(
         "CREATE TABLE IF NOT EXISTS people (
             id INTEGER PRIMARY KEY,
@@ -50,21 +49,21 @@ pub fn init_db(connection: &Connection)-> Result<()> {
         [],
     )?;
 
-
-
     // Create table for epi
     connection.execute(
         "CREATE TABLE IF NOT EXISTS epi (
             id INTEGER PRIMARY KEY,
             nature_id INTEGER NOT NULL,
             serial TEXT NOT NULL,
-            date_mise_en_service TEXT NOT NULL,
-            date_fabrication TEXT NOT NULL,
+            date_mise_en_service INTEGER NOT NULL,
+            date_fabrication INTEGER NOT NULL,
             validite_years INTEGER NOT NULL,
             assigned_to_id INTEGER,
             emplacement_id INTEGER,
             date_last_control TEXT,
-            date_rebus TEXT,
+            date_rebus INTEGER,
+            anomaly_id INTEGER,
+            FOREIGN KEY(anomaly_id) REFERENCES anomalies(id),
             FOREIGN KEY(nature_id) REFERENCES epi_materiel(id),
             FOREIGN KEY(assigned_to_id) REFERENCES people(id),
             FOREIGN KEY(emplacement_id) REFERENCES emplacement(id)
@@ -75,15 +74,108 @@ pub fn init_db(connection: &Connection)-> Result<()> {
     Ok(())
 }
 
-pub fn get_all_epi_materiel(connection: &Connection) -> Result<Vec<EpiMateriel>> {
+pub fn get_all_epi_materiel(connection: &Option<Connection>) -> Result<Vec<EpiMateriel>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
     let mut stmt = connection.prepare("SELECT id, nature FROM epi_materiel")?;
     let epi_materiel_iter = stmt.query_map([], |row| {
-        Ok(EpiMateriel{
-           id : row.get(0)?,
-           nature: row.get(1)?
+        Ok(EpiMateriel {
+            id: row.get(0)?,
+            nature: row.get(1)?,
         })
     })?;
-
-
     Ok(epi_materiel_iter.collect::<Result<Vec<EpiMateriel>>>()?)
+}
+
+pub fn get_all_epi(connection: &Option<Connection>) -> Result<Vec<Epi>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT * FROM epi")?;
+    let epi_iter = stmt.query_map([], |row| {
+        Ok(Epi {
+            id: Some(row.get(0)?),
+            nature_id: row.get(1)?,
+            serial: row.get(2)?,
+            date_mise_en_service: row.get(3)?,
+            date_fabrication: row.get(4)?,
+            validite_years: row.get(5)?,
+            assigned_to_id: None,
+            emplacement_id: None,
+            date_last_control: None,
+            date_rebus: None,
+            anomaly_id: None,
+        })
+    })?;
+    Ok(epi_iter.collect::<Result<Vec<Epi>>>()?)
+}
+
+pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+    if let Some(id) = epi.id {
+        // Update existing record
+        connection.execute(
+            "UPDATE epi SET 
+                nature_id = :nature_id, 
+                serial = :serial, 
+                date_mise_en_service = :date_mise_en_service,
+                date_fabrication = :date_fabrication, 
+                validite_years = :validite_years 
+             WHERE id = :id",
+            named_params! {
+                ":id": id,
+                ":nature_id": epi.nature_id,
+                ":serial": epi.serial,
+                ":date_mise_en_service": epi.date_mise_en_service.to_string(),
+                ":date_fabrication": epi.date_fabrication.to_string(),
+                ":validite_years": epi.validite_years
+            },
+        )?;
+    } else {
+        // Insert new record
+        connection.execute(
+            "INSERT INTO epi (
+                nature_id, 
+                serial, 
+                date_mise_en_service, 
+                date_fabrication, 
+                validite_years
+             ) VALUES (
+                :nature_id, 
+                :serial, 
+                :date_mise_en_service, 
+                :date_fabrication, 
+                :validite_years
+             )",
+            named_params! {
+                ":nature_id": epi.nature_id,
+                ":serial": epi.serial,
+                ":date_mise_en_service": epi.date_mise_en_service.to_string(),
+                ":date_fabrication": epi.date_fabrication.to_string(),
+                ":validite_years": epi.validite_years
+            },
+        )?;
+    }
+
+    Ok(())
 }
