@@ -1,4 +1,4 @@
-import { Component , inject, OnInit} from '@angular/core';
+import { Component , effect, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,8 +34,18 @@ export class AppComponent {
   activeLink = this.links[0];
   readonly dialog = inject(MatDialog);
   today: Date = new Date();
+  isDbLoaded = false;
 
-  constructor(private dataService:DataModelService) { }
+  constructor(private dataService:DataModelService) {
+
+    effect(() => {
+      this.isDbLoaded = this.dataService.isDbLoaded();
+      console.log("isDbLoaded", this.dataService.isDbLoaded());
+      if (this.dataService.isDbLoaded()) {
+        this.dataService.loadDatabase();
+      }
+    });
+   }
 
   ngOnInit(): void {
     

@@ -16,7 +16,7 @@ pub struct AppConfigData {
 impl AppConfigData {
     pub fn new() -> Self {
         Self {
-            ini_path: Mutex::new("test.ini".to_string()),
+            ini_path: Mutex::new("levage.ini".to_string()),
             db_path: Mutex::new("test.db".to_string()),
             connection: Mutex::new(None),
         }

@@ -4,6 +4,21 @@ use tauri::State;
 use crate::{database, model::Epi, state::AppConfigData};
 
 #[tauri::command]
+pub fn has_database(state: State<AppConfigData>) -> Result<bool, String> {
+    state.load_ini().map_err(|e| e.to_string())?;
+    let db_path = state.db_path.lock().unwrap().clone();
+
+    if db_path.is_empty() {
+        return Ok(false);
+    }
+    if std::path::Path::new(&db_path).exists() {
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+
+#[tauri::command]
 pub fn init_database(state: State<AppConfigData>) -> Result<String, String> {
     state.load_ini().map_err(|e| e.to_string())?;
     let db_path = state.db_path.lock().unwrap().clone();
@@ -18,6 +33,7 @@ pub fn init_database(state: State<AppConfigData>) -> Result<String, String> {
 
 #[tauri::command]
 pub fn save_epi(state: State<AppConfigData>, epi: String) -> String {
+    log::info!("save_epi {}", epi);
     let epi_parsed: Epi = serde_json::from_str(&epi).unwrap();
 
     let connection = state.connection.lock().unwrap();

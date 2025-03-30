@@ -14,8 +14,12 @@ pub fn run() {
             .target(tauri_plugin_log::Target::new(
                 tauri_plugin_log::TargetKind::Webview,
             ))
+            .target(tauri_plugin_log::Target::new(
+                tauri_plugin_log::TargetKind::LogDir { file_name: Some("Logs".to_string()) },
+            ))
             .build())
         .invoke_handler(tauri::generate_handler![
+            commands::has_database,
             commands::init_database,
             commands::save_epi,
             commands::get_epi,

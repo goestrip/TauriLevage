@@ -43,6 +43,19 @@ export class Epi{
         }
         return undefined;
     }
+
+    public copyFrom(other: Epi): void {
+        this.nature = other.nature;
+        this.serial = other.serial;
+        this.date_fabrication = other.date_fabrication;
+        this.date_mise_en_service = other.date_mise_en_service;
+        this.validite_years = other.validite_years;
+        this.assigned_to = other.assigned_to;
+        this.emplacement = other.emplacement;
+        this.date_last_control = other.date_last_control;
+        this.date_rebus = other.date_rebus;
+        this.anomaly = other.anomaly;
+    }
 }
 
 export function GenerateRandomEpi():Epi{

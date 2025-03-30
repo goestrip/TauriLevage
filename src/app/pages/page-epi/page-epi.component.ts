@@ -108,14 +108,14 @@ export class PageEpiComponent {
 
   readonly dialog = inject(MatDialog); // Inject MatDialog
 
-  toggleEditRow(epi: any): void {
+  toggleEditRow(epi: Epi): void {
     const dialogRef = this.dialog.open(FormEpiComponent, {
       data: { formTitle: 'Edit EPI', epi: epi } // Pass the EPI to the dialog
     });
 
     dialogRef.afterClosed().subscribe((updatedEpi: Epi) => {
       if (updatedEpi) {
-        Object.assign(epi, updatedEpi); // Update the EPI with the changes
+        epi.copyFrom(updatedEpi); // Update the EPI with the changes
         this.saveRow(epi); // Save the updated EPI
       }
     });

@@ -12,7 +12,7 @@ export class DataModelService {
 
   private epis : Epi[] = [];
   public materiels  = signal([] as EpiMateriel[]);
-
+  public isDbLoaded = signal(false);
   public epiSource = new MatTableDataSource(this.epis);
 
   constructor() {
@@ -20,7 +20,17 @@ export class DataModelService {
       new EpiMateriel(1, "none"),
 
     ]);
-    console.log("init");
+
+    invoke<string>("has_database", {}).then((hasDb:string) => {
+      console.log("has_database",hasDb);
+      this.isDbLoaded.set(hasDb == "true");
+    });
+
+   }
+
+   public loadDatabase(){
+
+    console.log("loadDatabase");
     invoke<string>("init_database", {}).then((text) => {
       console.log(text);
     });
