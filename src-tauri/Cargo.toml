@@ -27,4 +27,5 @@ rusqlite = {version ="0.34.0", features = ["bundled"] }
 configparser = "3.0.5"
 tauri-plugin-log = "2"
 log = "0.4"
+tauri-plugin-dialog = "2"
 

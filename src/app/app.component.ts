@@ -70,9 +70,16 @@ export class AppComponent {
   }
   
   openSettings(): void {
-    const dialogRef = this.dialog.open(SettingsComponent);
+    const dialogRef = this.dialog.open(SettingsComponent, {
+      width: '600px'
+    });
 
-
+    dialogRef.afterClosed().subscribe((fullPath) => {
+      if (fullPath) {
+        console.log('Received full path from settings dialog:', fullPath);
+        // Handle the full path here
+      }
+    });
   }
 
 }

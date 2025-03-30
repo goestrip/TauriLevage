@@ -1,9 +1,9 @@
+use log;
 use std::{
     env,
     io::{self, Write},
     sync::Mutex,
 };
-use log;
 
 use rusqlite::Connection;
 
@@ -37,7 +37,7 @@ impl AppConfigData {
 
         config.load(&*ini_path).unwrap();
         let db_path = config.get("PATH", "db");
-        match db_path{
+        match db_path {
             Some(path) => {
                 println!("db_path: {}", path);
                 log::info!("db_path: {}", path);
@@ -48,7 +48,7 @@ impl AppConfigData {
                 log::error!("db_path not found in ini file");
             }
         }
-        
+
         Ok(true)
     }
 }

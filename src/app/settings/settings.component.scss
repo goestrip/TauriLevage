@@ -1,7 +1,45 @@
 button {
     margin-right: 8px;
-  }
+    margin-top: 12px;
+    white-space: nowrap; /* Prevent button text from wrapping */
+    flex-shrink: 0; /* Prevent the button from shrinking */
+}
 
 input {
     margin-left: 8px;
+}
+
+h1 {
+  margin-bottom: 16px;
+}
+
+div {
+  margin-bottom: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-top: 8px;
+}
+
+:host {
+  display: block;
+  padding: 16px;
+}
+
+.directory-path {
+  margin-left: 12px;
+  font-style: italic;
+  color: gray;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100% - 150px); /* Adjust max width to leave space for the button */
+}
+
+.directory-selection {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Add spacing between the button and the directory path */
 }
