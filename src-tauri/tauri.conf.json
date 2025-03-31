@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Suivi Materiel",
-        "width": 1800,
-        "height": 900
+        "width": 900,
+        "height": 400
       }
     ],
     "security": {

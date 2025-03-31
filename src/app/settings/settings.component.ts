@@ -8,7 +8,7 @@ import { DataModelService } from '../services/data-model.service';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 
-import {open} from '@tauri-apps/plugin-dialog';
+import {open, save} from '@tauri-apps/plugin-dialog';
 
 
 @Component({
@@ -30,8 +30,7 @@ export class SettingsComponent {
   ) { }
 
   currentDatabaseName: string | null = null;
-  newDatabaseName: string = '';
-  selectedDirectory: string | null = null;
+  selectedFileName: string | null = null;
 
   ngOnInit(): void {
     this.currentDatabaseName = this.dataModelService.isDbLoaded() ? 'Base chargée' : null;
@@ -51,35 +50,29 @@ export class SettingsComponent {
     }
   }
 
-  openDirectoryDialog(): void {
-    open({ directory: true }).then((directory) => {
-      if (directory) {
-        this.selectedDirectory = directory as string;
-        console.log('Selected directory:', this.selectedDirectory);
+  openFileDialog(): void {
+    open({ directory: false,  filters: [{ name: 'Database Files', extensions: ['db'] }] }).then((filePath) => {
+      if (filePath) {
+        this.selectedFileName = filePath as string;
+      }
+    });
+  }
+
+  createNewFile(): void {
+    save({ title: 'Créer un nouveau fichier', filters: [{ name: 'Database Files', extensions: ['db'] }] }).then((filePath) => {
+      if (filePath) {
+        this.selectedFileName = filePath as string;
       }
     });
   }
 
   applySettings(): void {
-    if (this.selectedDirectory && this.newDatabaseName) {
-      // Validate the file name
-      const invalidChars = /[<>:"/\\|?*\x00-\x1F]/g;
-      if (invalidChars.test(this.newDatabaseName)) {
-        console.error('Invalid file name:', this.newDatabaseName);
-        alert('Le nom de fichier contient des caractères non valides.');
-        return;
-      }
-
-      // Append '.db' extension if not already present
-      if (!this.newDatabaseName.endsWith('.db')) {
-        this.newDatabaseName += '.db';
-      }
-
-      const fullPath = `${this.selectedDirectory}\\${this.newDatabaseName}`;
-      console.log('Full path:', fullPath);
-      this.dialogRef.close(fullPath); // Pass the full path to the caller
-    } else {
-      this.dialogRef.close(); // Close without passing data if inputs are incomplete
+    if(this.selectedFileName) {
+      
+      this.dialogRef.close(this.selectedFileName);
+    }
+    else {
+      this.dialogRef.close(null);
     }
   }
 }

@@ -21,9 +21,11 @@ export class DataModelService {
 
     ]);
 
-    invoke<string>("has_database", {}).then((hasDb:string) => {
+    invoke<string>("has_database", {}).then((hasDbStr) => {
+      let hasDb = hasDbStr as any as boolean;
       console.log("has_database",hasDb);
-      this.isDbLoaded.set(hasDb == "true");
+      //this.isDbLoaded.set(hasDb == "true");
+      this.isDbLoaded.set(hasDb);
     });
 
    }

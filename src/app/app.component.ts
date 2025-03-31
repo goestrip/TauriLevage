@@ -74,10 +74,16 @@ export class AppComponent {
       width: '600px'
     });
 
-    dialogRef.afterClosed().subscribe((fullPath) => {
-      if (fullPath) {
-        console.log('Received full path from settings dialog:', fullPath);
+    dialogRef.afterClosed().subscribe((db_path) => {
+      if (db_path) {
+        console.log('Received full path from settings dialog:', db_path);
         // Handle the full path here
+        invoke<string>("set_db_path", {dbPath: db_path}).then((result: string) => {
+          console.log("db path set ,", result);
+        })
+        .then(() => {
+          this.dataService.loadDatabase();
+        });
       }
     });
   }

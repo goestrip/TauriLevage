@@ -48,7 +48,28 @@ pub fn init_db(connection: &Connection) -> Result<()> {
         )",
         [],
     )?;
+    // Insert default values into epi_materiel if they don't exist
+    connection.execute(
+        "INSERT INTO epi_materiel (id, nature)
+        SELECT 1, 'Helmet'
+        WHERE NOT EXISTS (SELECT 1 FROM epi_materiel WHERE id = 1)",
+        [],
+    )?;
 
+    connection.execute(
+        "INSERT INTO epi_materiel (id, nature)
+        SELECT 2, 'Gloves'
+        WHERE NOT EXISTS (SELECT 1 FROM epi_materiel WHERE id = 2)",
+        [],
+    )?;
+
+    connection.execute(
+        "INSERT INTO epi_materiel (id, nature)
+        SELECT 3, 'Boots'
+        WHERE NOT EXISTS (SELECT 1 FROM epi_materiel WHERE id = 3)",
+        [],
+    )?;
+    
     // Create table for epi
     connection.execute(
         "CREATE TABLE IF NOT EXISTS epi (

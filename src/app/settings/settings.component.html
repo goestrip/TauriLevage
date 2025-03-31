@@ -1,19 +1,17 @@
 <h1>Configuration</h1>
 
 <div>
-  <p>Nom de la base de données actuelle : {{ currentDatabaseName || 'Non chargée' }}</p>
+  <p> {{ currentDatabaseName || 'Non chargée' }}</p>
 </div>
 
-<div class="directory-selection">
-  <button mat-raised-button color="primary" (click)="openDirectoryDialog()">Sélectionner un répertoire</button>
-  <span *ngIf="selectedDirectory" class="directory-path">{{ selectedDirectory }}</span>
+
+<div class="file-actions">
+  <button mat-raised-button color="primary" (click)="openFileDialog()">Ouvrir un fichier existant</button>
+  <button mat-raised-button color="accent" (click)="createNewFile()">Créer un nouveau fichier</button>
 </div>
 
-<div>
-  <mat-form-field appearance="fill">
-    <mat-label>Nom de la base</mat-label>
-    <input matInput [(ngModel)]="newDatabaseName" placeholder="Nom de la base">
-  </mat-form-field>
+<div class="file-display">
+  <span *ngIf="selectedFileName" class="file-path">{{ selectedFileName }}</span>
 </div>
 
 <div>

@@ -51,4 +51,18 @@ impl AppConfigData {
 
         Ok(true)
     }
+
+    pub fn set_db_path(&self, db_path: String) -> Result<String, String> {
+        let mut db_path_lock = self.db_path.lock().unwrap();
+        *db_path_lock = db_path.clone();
+        log::info!("Database path set to {}, saving to inifile", db_path);
+
+        let ini_path = self.ini_path.lock().unwrap();
+        let mut config = configparser::ini::Ini::new();
+        config.set("PATH", "db", Some(db_path.clone()));
+        config.write(&*ini_path).unwrap();
+        log::info!("Database path saved to ini file {}", &*ini_path);
+
+        Ok(db_path)
+    }
 }

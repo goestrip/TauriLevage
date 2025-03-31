@@ -43,3 +43,18 @@ mat-form-field {
   align-items: center;
   gap: 12px; /* Add spacing between the button and the directory path */
 }
+
+.file-actions {
+  display: flex;
+  gap: 12px; /* Space between the buttons */
+  margin-bottom: 12px;
+}
+
+.file-display {
+  margin-top: 8px;
+  font-style: italic;
+  color: gray;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

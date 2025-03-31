@@ -32,6 +32,13 @@ pub fn init_database(state: State<AppConfigData>) -> Result<String, String> {
 }
 
 #[tauri::command]
+pub fn set_db_path(state: State<AppConfigData>, db_path: String) -> Result<String, String> {
+    log::info!("setting Database path to {}", db_path);
+    state.set_db_path(db_path.clone()).map_err(|e| e.to_string())?;
+    Ok(db_path)
+}
+
+#[tauri::command]
 pub fn save_epi(state: State<AppConfigData>, epi: String) -> String {
     log::info!("save_epi {}", epi);
     let epi_parsed: Epi = serde_json::from_str(&epi).unwrap();

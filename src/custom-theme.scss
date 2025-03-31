@@ -28,7 +28,7 @@
 ));
 
 html {
-  color-scheme: light ;
+  color-scheme: light dark;
   @include mat.theme((
     color: (
       primary: mat.$green-palette,

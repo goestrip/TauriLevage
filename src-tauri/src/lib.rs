@@ -26,6 +26,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::has_database,
             commands::init_database,
+            commands::set_db_path,
             commands::save_epi,
             commands::get_epi,
             commands::get_epi_materiel
