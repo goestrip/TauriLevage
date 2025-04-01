@@ -1,6 +1,6 @@
 use rusqlite::{named_params, Connection, Result};
 
-use crate::model::{Epi, EpiMateriel};
+use crate::model::{Epi, EpiMateriel, People};
 
 //open a sqlite db
 pub fn open_db(path: &str) -> Result<Connection> {
@@ -92,6 +92,47 @@ pub fn get_all_epi_materiel(connection: &Option<Connection>) -> Result<Vec<EpiMa
         })
     })?;
     Ok(epi_materiel_iter.collect::<Result<Vec<EpiMateriel>>>()?)
+}
+
+pub fn get_all_people(connection: &Option<Connection>) -> Result<Vec<People>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT id, prenom, nom FROM people")?;
+    let people_iter = stmt.query_map([], |row| {
+        Ok(People {
+            id: row.get(0)?,
+            prenom: row.get(1)?,
+            nom: row.get(2)?,
+        })
+    })?;
+    Ok(people_iter.collect::<Result<Vec<crate::model::People>>>()?)
+}
+
+pub fn get_all_emplacement(connection: &Option<Connection>) -> Result<Vec<crate::model::Emplacement>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT id, location FROM emplacement")?;
+    let emplacement_iter = stmt.query_map([], |row| {
+        Ok(crate::model::Emplacement {
+            id: row.get(0)?,
+            location: row.get(1)?,
+        })
+    })?;
+    Ok(emplacement_iter.collect::<Result<Vec<crate::model::Emplacement>>>()?)
 }
 
 pub fn get_all_epi(connection: &Option<Connection>) -> Result<Vec<Epi>> {

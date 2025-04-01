@@ -84,3 +84,29 @@ pub fn get_epi(state: State<AppConfigData>) -> Result<String, String> {
 
     Ok(serde_json::to_string(&epi).unwrap())
 }
+
+#[tauri::command]
+pub fn get_people(state: State<AppConfigData>) -> Result<String, String> {
+    log::info!("get_people");
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("No Database connection in state");
+        return Err("No Database connection ".to_string());
+    }
+    let people = database::get_all_people(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&people).unwrap())
+}
+#[tauri::command]
+pub fn get_emplacement(state: State<AppConfigData>) -> Result<String, String> {
+    log::info!("get_emplacement");
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("No Database connection in state");
+        return Err("No Database connection ".to_string());
+    }
+    let emplacement = database::get_all_emplacement(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&emplacement).unwrap())
+}
+

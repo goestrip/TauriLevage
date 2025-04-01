@@ -4,6 +4,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { invoke } from "@tauri-apps/api/core";
 import { EpiMateriel } from '../model/catalogMateriel';
 import { EpiDto } from '../model/dto/epiDto';
+import { People } from '../model/people';
+import { Emplacement } from '../model/emplacement';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +14,8 @@ export class DataModelService {
 
   private epis : Epi[] = [];
   public materiels  = signal([] as EpiMateriel[]);
+  public employees = signal([] as People[]);
+  public locations = signal([] as Emplacement[]);
   public isDbLoaded = signal(false);
   public epiSource = new MatTableDataSource(this.epis);
 
@@ -57,6 +61,20 @@ export class DataModelService {
         
       }
       console.log("loaded epi from back",this.epis);
+    });
+
+    invoke<string>("get_people", {}).then((json) => {
+      const people: People[] = JSON.parse(json);
+      people.sort((a, b) => a.nom.localeCompare(b.nom));
+      this.employees.set(people);
+      //console.log(people);
+    });
+
+    invoke<string>("get_emplacement", {}).then((json) => {
+      const locations: Emplacement[] = JSON.parse(json);
+      locations.sort((a, b) => a.location.localeCompare(b.location));
+      this.locations.set(locations);
+      //console.log(locations);
     });
    }
 

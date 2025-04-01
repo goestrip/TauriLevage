@@ -29,7 +29,9 @@ pub fn run() {
             commands::set_db_path,
             commands::save_epi,
             commands::get_epi,
-            commands::get_epi_materiel
+            commands::get_epi_materiel,
+            commands::get_people,
+            commands::get_emplacement,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

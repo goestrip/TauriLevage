@@ -12,6 +12,8 @@ import { DataModelService } from '../../services/data-model.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Epi } from '../../model/epi';
 import { predicateValidator } from '../validators/serial-validator';
+import { People } from '../../model/people';
+import { Emplacement } from '../../model/emplacement';
 
 @Component({
   selector: 'app-form-epi',
@@ -30,6 +32,9 @@ export class FormEpiComponent implements OnInit {
   @Input() formTitle: string = ''; // Existing input property
   epiForm: FormGroup;
   epiMaterielList: EpiMateriel[] = [];
+  peopleList: People[] = [];
+  locationList: Emplacement[] = [];
+  filteredLocations: Emplacement[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { formTitle?: string; epi?: Epi }, // Include EPI in dialog data
@@ -63,6 +68,12 @@ export class FormEpiComponent implements OnInit {
 
     effect(() => {
       this.epiMaterielList = this.dataService.materiels();
+    });
+    effect(() => {
+      this.peopleList = this.dataService.employees();
+    });
+    effect(() => {
+      this.locationList = this.dataService.locations();
     });
   }
 
