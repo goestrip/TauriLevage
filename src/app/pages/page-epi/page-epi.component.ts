@@ -9,6 +9,7 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
 import { MatOptionModule } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { FormEpiComponent } from '../../forms/form-epi/form-epi.component';
@@ -23,29 +24,6 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { EpiMateriel } from '../../model/catalogMateriel';
 
 
-const COLUMNS_SCHEMA = [
-  {
-    key: "serial",
-    type: "text",
-    label: "numero de serie"
-  },
-  {
-    key: "date_fabrication",
-    type: "text",
-    label: "date_fabrication"
-  },
-  {
-    key: "occupation",
-    type: "text",
-    label: "Occupation"
-  },
-  {
-    key: "validite_years",
-    type: "number",
-    label: "Validite"
-  }
-]
-
 @Component({
   selector: 'app-page-epi',
   imports: [MatTableModule,
@@ -54,6 +32,7 @@ const COLUMNS_SCHEMA = [
     MatInputModule,
     DatePipe,
     MatIconModule,
+    MatButtonModule,
     CommonModule,
     MatSortModule ,
     MatDatepickerModule,
@@ -86,9 +65,10 @@ export class PageEpiComponent {
 
   epiData: MatTableDataSource<Epi>;
   epiMateriel: EpiMateriel[] = [];
+  filter: string = '';
 
   editingRow: any = null;
-
+  readonly dialog = inject(MatDialog); // Inject MatDialog
  
   @ViewChild(MatSort) sort: MatSort | null = null;
 
@@ -106,7 +86,7 @@ export class PageEpiComponent {
     this.epiData.sort = this.sort;
   }
 
-  readonly dialog = inject(MatDialog); // Inject MatDialog
+  
 
   toggleEditRow(epi: Epi): void {
     const dialogRef = this.dialog.open(FormEpiComponent, {
@@ -137,11 +117,17 @@ export class PageEpiComponent {
     return true;
   }
 
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.epiData.filter = filterValue.trim().toLowerCase();
+  }
+
+  clearFilter(): void {
+    this.filter = '';
+    this.epiData.filter = ''; // Clear the filter
+  }
+
   announceSortChange(sortState: Sort) {
-    // This example uses English messages. If your application supports
-    // multiple language, you would internationalize these strings.
-    // Furthermore, you can customize the message to add additional
-    // details about the values being sorted.
     if (sortState.direction) {
       this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
     } else {

@@ -50,6 +50,12 @@ export class DataModelService {
       });
 
       this.epiSource.data = this.epis;
+      this.epiSource.filterPredicate = (data: Epi, filter: string) => {
+        console.log("filterPredicate",data, filter);
+        return data.serial.includes(filter)
+        || (data.nature?.nature.toLowerCase().includes(filter) ?? false)
+        
+      }
       console.log("loaded epi from back",this.epis);
     });
    }

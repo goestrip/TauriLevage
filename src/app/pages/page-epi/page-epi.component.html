@@ -1,3 +1,16 @@
+<div class="filter-container">
+  <mat-form-field floatLabel="always">
+    <mat-label>Filter</mat-label>
+    <input matInput (keyup)="applyFilter($event)" [(ngModel)]="filter" placeholder="Rechercher" #input>
+    @if (filter) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="clearFilter()">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+  
+</div>
+
 <table mat-table matSort  [dataSource]="epiData" (matSortChange)="announceSortChange($event)">
   
   <ng-container matColumnDef="edition" [sticky]="true">
