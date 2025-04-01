@@ -93,9 +93,10 @@ export class PageEpiComponent {
       data: { formTitle: 'Edit EPI', epi: epi } // Pass the EPI to the dialog
     });
 
+
     dialogRef.afterClosed().subscribe((updatedEpi: Epi) => {
       if (updatedEpi) {
-        epi.copyFrom(updatedEpi); // Update the EPI with the changes
+        (epi as Epi).copyFrom(updatedEpi); // Update the EPI with the changes
         this.saveRow(epi); // Save the updated EPI
       }
     });

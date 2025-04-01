@@ -11,6 +11,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { DataModelService } from '../../services/data-model.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Epi } from '../../model/epi';
+import { predicateValidator } from '../validators/serial-validator';
 
 @Component({
   selector: 'app-form-epi',
@@ -41,7 +42,12 @@ export class FormEpiComponent implements OnInit {
     }
 
     this.epiForm = this.fb.group({
-      serialNumber: [data?.epi?.serial || '', Validators.required],
+      serialNumber: [data?.epi?.serial || '', [
+         Validators.required,
+         predicateValidator((value) =>
+           this.data.epi?.serial == value ||
+           (this.data.epi?.serial != value && !this.dataService.epiSerialExists(value)),
+          'alreadyExists') ]],
       nature: [data?.epi?.nature || '', Validators.required],
       fabricationDate: [data?.epi?.date_fabrication || '', Validators.required],
       activationDate: [data?.epi?.date_mise_en_service || '', Validators.required],
@@ -64,6 +70,14 @@ export class FormEpiComponent implements OnInit {
     // Automatically calculate validiteLimite when validiteYears or fabricationDate changes
     this.epiForm.get('validiteYears')?.valueChanges.subscribe(() => this.calculateValidityLimit());
     this.epiForm.get('fabricationDate')?.valueChanges.subscribe(() => this.calculateValidityLimit());
+
+    // Preset activationDate to fabricationDate when editing activationDate
+    this.epiForm.get('fabricationDate')?.valueChanges.subscribe((fabricationDate) => {
+      const activationDate = this.epiForm.get('activationDate')?.value;
+      if (!activationDate && fabricationDate) {
+        this.epiForm.get('activationDate')?.setValue(fabricationDate);
+      }
+    });
   }
 
   private calculateValidityLimit(): void {

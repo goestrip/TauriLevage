@@ -77,4 +77,8 @@ export class DataModelService {
     });
    }
 
+   public epiSerialExists(serial: string): boolean {
+    return this.epis.some((epi) => epi.serial === serial);
+   }
+
 }
