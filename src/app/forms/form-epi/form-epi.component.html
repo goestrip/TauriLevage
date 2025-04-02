@@ -2,10 +2,10 @@
 <form [formGroup]="epiForm" (ngSubmit)="onSubmit()">
   <div class="form-grid">
     <mat-form-field appearance="outline">
-      <mat-label>Serial Number</mat-label>
+      <mat-label>Numéro de série</mat-label>
       <input matInput formControlName="serialNumber" />
       <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('required')">
-        Serial number is required.
+        numéro nécessaire.
       </mat-error>
       <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('alreadyExists')">
         Déja utilisé.
@@ -51,6 +51,9 @@
       <mat-label>Assignation</mat-label>
     
       <input type="text" matInput [formControl]="peopleFormControl" [matAutocomplete]="auto">
+      <button mat-icon-button matSuffix *ngIf="peopleFormControl.value" (click)="peopleFormControl.reset()">
+        <mat-icon>clear</mat-icon>
+      </button>
       <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
         <mat-option *ngFor="let item of (filteredPeople | async)" [value]="item">
           {{ item.prenom }} {{ item.nom }}
@@ -60,12 +63,14 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Emplacement</mat-label>
-      
       <mat-select formControlName="emplacement">
-        <mat-option *ngFor="let item of locationList" [value]="item">
-          {{ item.location}}
-        </mat-option>
+      <mat-option *ngFor="let item of locationList" [value]="item">
+        {{ item.location }}
+      </mat-option>
       </mat-select>
+      <button mat-icon-button matSuffix *ngIf="epiForm.get('emplacement')?.value" (click)="epiForm.get('emplacement')?.reset()">
+       <mat-icon>clear</mat-icon>
+      </button>
     </mat-form-field>
 
     <mat-form-field appearance="outline">

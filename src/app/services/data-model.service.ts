@@ -67,15 +67,19 @@ export class DataModelService {
         return EpiDto.ToEpi(epiDto, this.materiels(), this.employees(), this.locations());
       });
 
+
       this.epiSource.data = this.epis;
-      this.epiSource.filterPredicate = (data: Epi, filter: string) => {
-        console.log("filterPredicate",data, filter);
-        return data.serial.includes(filter)
-        || (data.nature?.nature.toLowerCase().includes(filter) ?? false)
-        
-      }
       console.log("loaded epi from back",this.epis);
     });
+    
+    this.epiSource.filterPredicate = (data: Epi, filter: string) => {
+      console.log("filterPredicate",data, filter);
+      return data.serial.includes(filter)
+      || (data.nature?.nature.toLowerCase().includes(filter) ?? false)
+      || (data.assigned_to?.nom.toLowerCase().includes(filter) ?? false)
+      || (data.assigned_to?.prenom.toLowerCase().includes(filter) ?? false)
+      || (data.emplacement?.location.toLowerCase().includes(filter) ?? false)
+    }
    }
 
    public addEpi(newEpi?: Epi) {

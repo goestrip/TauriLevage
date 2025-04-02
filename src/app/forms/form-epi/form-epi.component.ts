@@ -17,6 +17,7 @@ import { predicateValidator } from '../validators/serial-validator';
 import { People } from '../../model/people';
 import { Emplacement } from '../../model/emplacement';
 import { map, Observable, startWith } from 'rxjs';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-form-epi',
@@ -27,6 +28,7 @@ import { map, Observable, startWith } from 'rxjs';
     MatSelectModule,
     MatDatepickerModule,
     MatAutocompleteModule,
+    MatIconModule,
     MatButtonModule,],
     providers: [provideNativeDateAdapter()],
   templateUrl: './form-epi.component.html',
