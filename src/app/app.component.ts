@@ -57,6 +57,8 @@ export class AppComponent {
 
   addLine(): void {
     let dialogRef = this.dialog.open(FormEpiComponent, {
+      width: '900px',
+      maxWidth: '90vw',
         data: { formTitle: 'epi' } // Pass 'epi' as the form title
     });
 

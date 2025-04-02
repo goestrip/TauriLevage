@@ -13,7 +13,7 @@ h2 {
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(200px, 1fr)); // Ensure each column has a minimum width of 200px
+    grid-template-columns: repeat(2, minmax(300px, 1fr)); // Ensure each column has a minimum width of 200px
     gap: 16px;
     padding-top: 24px; // Added padding before the first row
 }

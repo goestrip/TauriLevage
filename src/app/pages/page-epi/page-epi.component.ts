@@ -52,7 +52,7 @@ export class PageEpiComponent {
      'date_mise_en_service',
      'validite_years',
      'validiteLimite',
-     'assignedTo',
+     'assigned_to',
      'emplacement',
    
      'date_last_control',
@@ -90,6 +90,8 @@ export class PageEpiComponent {
 
   toggleEditRow(epi: Epi): void {
     const dialogRef = this.dialog.open(FormEpiComponent, {
+      width: '900px',
+      maxWidth: '90vw',
       data: { formTitle: 'Edit EPI', epi: epi } // Pass the EPI to the dialog
     });
 

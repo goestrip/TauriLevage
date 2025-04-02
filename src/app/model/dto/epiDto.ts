@@ -1,5 +1,7 @@
 import { EpiMateriel } from "../catalogMateriel";
+import { Emplacement } from "../emplacement";
 import { Epi } from "../epi";
+import { People } from "../people";
 
 
 export class EpiDto{
@@ -15,7 +17,7 @@ export class EpiDto{
     public date_last_control: Date|null = null;
     public date_rebus: Date|null = null;
     
-    public static ToEpi(dto:EpiDto, materiels: EpiMateriel[]):Epi{
+    public static ToEpi(dto:EpiDto, materiels: EpiMateriel[], employees: People[], locations:Emplacement[]):Epi{
        return Object.assign(new Epi(),{
             id: dto.id,
             serial: dto.serial,
@@ -24,6 +26,8 @@ export class EpiDto{
             date_mise_en_service: dto.date_mise_en_service ? new Date(dto.date_mise_en_service) : null,
             validite_years: dto.validite_years,
             date_rebus: dto.date_rebus ? new Date(dto.date_rebus) : null,
+            assigned_to: employees.find(l => l.id == dto.assigned_to_id) || null,
+            emplacement: locations.find(e => e.id == dto.emplacement_id) || null,
        });
     }
 

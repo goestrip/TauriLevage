@@ -49,7 +49,13 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Assignation</mat-label>
-      <input matInput formControlName="assignedTo" />
+    
+      <input type="text" matInput [formControl]="peopleFormControl" [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+        <mat-option *ngFor="let item of (filteredPeople | async)" [value]="item">
+          {{ item.prenom }} {{ item.nom }}
+        </mat-option>
+      </mat-autocomplete>
     </mat-form-field>
 
     <mat-form-field appearance="outline">

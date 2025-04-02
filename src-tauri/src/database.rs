@@ -183,7 +183,9 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 date_fabrication = :date_fabrication, 
                 validite_years = :validite_years ,
                 date_last_control = :date_last_control,
-                date_rebus = :date_rebus
+                date_rebus = :date_rebus,
+                assigned_to_id = :assigned_to_id,
+                emplacement_id = :emplacement_id
              WHERE id = :id",
             named_params! {
                 ":id": id,
@@ -192,8 +194,8 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 ":date_mise_en_service": epi.date_mise_en_service.to_string(),
                 ":date_fabrication": epi.date_fabrication.to_string(),
                 ":validite_years": epi.validite_years,
-                // ":assigned_to_id": &epi.assigned_to_id.map(|p| p.id),
-                // ":emplacement_id": epi.emplacement_id.map(|e| e.id),
+                ":assigned_to_id": epi.assigned_to_id,
+                ":emplacement_id": epi.emplacement_id,
                 ":date_last_control": epi.date_last_control.unwrap_or_default(),
                 ":date_rebus": epi.date_rebus.unwrap_or_default()
             },
@@ -208,7 +210,9 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 date_fabrication, 
                 validite_years, 
                 date_last_control, 
-                date_rebus
+                date_rebus,
+                assigned_to_id ,
+                emplacement_id 
             ) VALUES (
                 :nature_id, 
                 :serial, 
@@ -216,7 +220,9 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 :date_fabrication, 
                 :validite_years, 
                 :date_last_control, 
-                :date_rebus
+                :date_rebus,
+                :assigned_to_id,
+                :emplacement_id
             )",
             named_params! {
                 ":nature_id": epi.nature_id,
@@ -225,7 +231,9 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 ":date_fabrication": epi.date_fabrication.to_string(),
                 ":validite_years": epi.validite_years,
                 ":date_last_control": epi.date_last_control.unwrap_or_default(),
-                ":date_rebus": epi.date_rebus.unwrap_or_default()
+                ":date_rebus": epi.date_rebus.unwrap_or_default(),
+                ":assigned_to_id": epi.assigned_to_id,
+                ":emplacement_id": epi.emplacement_id,
             },
         )?;
     }

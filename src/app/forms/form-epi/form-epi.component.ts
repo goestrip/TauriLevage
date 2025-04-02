@@ -1,5 +1,5 @@
 import { Component, Input, Inject, effect, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup,FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { EpiMateriel } from '../../model/catalogMateriel';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,12 +8,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { DataModelService } from '../../services/data-model.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+
+import { DataModelService } from '../../services/data-model.service';
 import { Epi } from '../../model/epi';
 import { predicateValidator } from '../validators/serial-validator';
 import { People } from '../../model/people';
 import { Emplacement } from '../../model/emplacement';
+import { map, Observable, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-form-epi',
@@ -23,6 +26,7 @@ import { Emplacement } from '../../model/emplacement';
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
+    MatAutocompleteModule,
     MatButtonModule,],
     providers: [provideNativeDateAdapter()],
   templateUrl: './form-epi.component.html',
@@ -33,6 +37,9 @@ export class FormEpiComponent implements OnInit {
   epiForm: FormGroup;
   epiMaterielList: EpiMateriel[] = [];
   peopleList: People[] = [];
+  peopleFormControl = new FormControl();
+  filteredPeople!: Observable<any[]>; // Filtered list for people
+
   locationList: Emplacement[] = [];
   filteredLocations: Emplacement[] = [];
 
@@ -58,7 +65,7 @@ export class FormEpiComponent implements OnInit {
       activationDate: [data?.epi?.date_mise_en_service || '', Validators.required],
       validiteYears: [data?.epi?.validite_years || 5, [Validators.required, Validators.min(0), Validators.max(100)]],
       validiteLimite: [{ value: data?.epi?.validiteLimite || '', disabled: true }],
-      assignedTo: [data?.epi?.assigned_to || ''],
+      assigned_to: this.peopleFormControl,
       emplacement: [data?.epi?.emplacement || ''],
       dateLastControl: [data?.epi?.date_last_control || ''],
       dateRebus: [data?.epi?.date_rebus || ''],
@@ -89,6 +96,14 @@ export class FormEpiComponent implements OnInit {
         this.epiForm.get('activationDate')?.setValue(fabricationDate);
       }
     });
+
+    this.peopleFormControl.setValue(this.data?.epi?.assigned_to || null); // Set the initial value for peopleFormControl
+
+      // Filter the people list based on user input
+      this.filteredPeople = this.peopleFormControl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filterPeople(value || '')),
+      );
   }
 
   private calculateValidityLimit(): void {
@@ -105,6 +120,25 @@ export class FormEpiComponent implements OnInit {
     }
   }
 
+  private _filterPeople(value: any): any[] {
+    if(typeof value === 'string') {
+      const filterValue = value.toLowerCase();
+      return this.peopleList.filter(option =>
+        option.nom.toLowerCase().includes(filterValue) ||
+        option.prenom.toLowerCase().includes(filterValue)
+      );
+    }
+    else {
+      const selectedPerson = value as People;
+      return [selectedPerson.nom];
+    }
+  }
+
+    // Function to display the selected value in the input field
+    displayFn(person: any): string {
+      return person ? `${person.prenom} ${person.nom}` : '';
+    }
+
   onSubmit() {
     if (this.epiForm.valid) {
       const updatedEpi = {
@@ -115,7 +149,7 @@ export class FormEpiComponent implements OnInit {
         date_mise_en_service: new Date(this.epiForm.get('activationDate')?.value),
         validite_years: this.epiForm.get('validiteYears')?.value,
         validiteLimite: new Date(this.epiForm.get('validiteLimite')?.value),
-        assignedTo: this.epiForm.get('assignedTo')?.value,
+        assigned_to: this.epiForm.get('assigned_to')?.value,
         emplacement: this.epiForm.get('emplacement')?.value,
         date_last_control: this.epiForm.get('dateLastControl')?.value,
         date_rebus: this.epiForm.get('dateRebus')?.value ? new Date(this.epiForm.get('dateRebus')?.value) : null,

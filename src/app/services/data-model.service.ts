@@ -34,7 +34,7 @@ export class DataModelService {
 
    }
 
-   public loadDatabase(){
+   public async loadDatabase(){
 
     console.log("loadDatabase");
     invoke<string>("init_database", {}).then((text) => {
@@ -47,10 +47,24 @@ export class DataModelService {
       console.log(materiels);
     });
 
+   
+
+    await(async () => {
+      const peopleJson = await invoke<string>("get_people", {});
+      const people: People[] = JSON.parse(peopleJson);
+      people.sort((a, b) => a.nom.localeCompare(b.nom));
+      this.employees.set(people);
+
+      const locationsJson = await invoke<string>("get_emplacement", {});
+      const locations: Emplacement[] = JSON.parse(locationsJson);
+      locations.sort((a, b) => a.location.localeCompare(b.location));
+      this.locations.set(locations);
+    })();
+
     invoke<string>("get_epi", {}).then((json) => {
       const epiDtos: EpiDto[] = JSON.parse(json);
       this.epis = epiDtos.map((epiDto) => {
-        return EpiDto.ToEpi(epiDto, this.materiels());
+        return EpiDto.ToEpi(epiDto, this.materiels(), this.employees(), this.locations());
       });
 
       this.epiSource.data = this.epis;
@@ -61,20 +75,6 @@ export class DataModelService {
         
       }
       console.log("loaded epi from back",this.epis);
-    });
-
-    invoke<string>("get_people", {}).then((json) => {
-      const people: People[] = JSON.parse(json);
-      people.sort((a, b) => a.nom.localeCompare(b.nom));
-      this.employees.set(people);
-      //console.log(people);
-    });
-
-    invoke<string>("get_emplacement", {}).then((json) => {
-      const locations: Emplacement[] = JSON.parse(json);
-      locations.sort((a, b) => a.location.localeCompare(b.location));
-      this.locations.set(locations);
-      //console.log(locations);
     });
    }
 
