@@ -3,32 +3,9 @@
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
 
-// @include mat.tabs-overrides((
-//   background-color: orange,
-//   foreground-color: orange,
-//   inactive-label-text-color: rgb(158, 168, 161),
-//   active-hover-label-text-color: rgb(55, 106, 216),
-  
-//   active-hover-indicator-color: rgb(216, 55, 203),
-// ));
-
-// @include mat.datepicker-overrides((
-//   calendar-date-selected-state-text-color: orange,
-//   calendar-date-selected-state-background-color: rgb(65, 119, 65),
-//   calendar-container-text-color: rgb(65, 172, 97),
-//   calendar-text-size: 1em,
-// ));
-
-@include mat.form-field-overrides((
-  filled-caret-color: rgb(218, 218, 218),
-  filled-focus-active-indicator-color: red,
-  container-height: 1em,
-  container-vertical-padding: 1.5em,
-  filled-with-label-container-padding-top: 5px,
-));
 
 html {
-  color-scheme: light dark;
+  color-scheme: light ;
   @include mat.theme((
     color: (
       primary: mat.$green-palette,
@@ -39,13 +16,7 @@ html {
     density: -3,
   ));
  }
-// html, body { height: 100%; }
-// h2 {
-//   font-size: 20px;
-  
-//   margin: 4px;
-//   color: var(--mat-primary-color);
-// }
+
 body {
   margin: 0;
   overflow: hidden;
@@ -53,13 +24,6 @@ body {
   background-color: var(--mat-sys-background); 
 }
 
-// nav {
-//   background-color: mat.$primary-palette;
-//   color: mat.$primary-palette;
-// }
-
-
-
-// a.active {
-//   color: mat.$primary-palette;
-// }
+nav {
+  background-color: var(--mat-sys-background);
+}

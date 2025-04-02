@@ -108,11 +108,24 @@ export class PageEpiComponent {
     this.dataService.saveEpi(epi); // Save the EPI to the data service
   }
 
-  validityOverdue(epi: Epi): boolean {
+  validityOverdue(epi: Epi): string {
     if (!epi.validiteLimite) {
-      return false;
+      return '';
     }
-    return  new Date() >= epi.validiteLimite ;    
+    const oneYearBeforeLimit = new Date(epi.validiteLimite);
+    oneYearBeforeLimit.setFullYear(oneYearBeforeLimit.getFullYear() - 1);
+
+    const now = new Date();
+    
+    if (now >= oneYearBeforeLimit && now < epi.validiteLimite) {
+      return 'orange';
+    }
+    else if (now >= epi.validiteLimite) {
+      return 'red';
+    }
+    else{
+      return '';
+    }
   }
   
   dateControl(epi: Epi): boolean {
