@@ -46,6 +46,7 @@ export class FormEpiComponent implements OnInit {
   epiForm: FormGroup;
 
   formEPI: Epi|null = null; // EPI form data
+  anomaly : Anomaly|null = null; // Anomaly data
 
   epiMaterielList: EpiMateriel[] = [];
   peopleList: People[] = [];
@@ -96,8 +97,6 @@ export class FormEpiComponent implements OnInit {
       emplacement: [data?.epi?.emplacement || ''],
       dateLastControl: [data?.epi?.date_last_control || ''],
       dateRebus: [data?.epi?.date_rebus || ''],
-      anomalyName: [data?.epi?.anomaly?.title || ''],
-      anomalyCriticity: [data?.epi?.anomaly?.criticity || '']
     });
 
     effect(() => {
@@ -167,25 +166,10 @@ export class FormEpiComponent implements OnInit {
     }
 
    addAnomaly() {
-  //   this.anomalySources.data = [...this.anomalySources.data,
-  //      Object.assign(new Anomaly(),{
-  //       id: this.anomalySources.data.length + 1,
-  //       title: 'title',
-  //       description: 'description',
-  //       criticity: Criticity.NORMAL,
-  //       date_detection: new Date(),
-  //       date_resolution: null}
-  //     )];
+    this.anomaly = new Anomaly();
+
    }
 
-  // toggleEditRow(anomaly: Anomaly) {
-  //   if (this.editingAnomaly === anomaly) {
-  //     this.editingAnomaly = null; // Stop editing if the same row is clicked again
-  //   }
-  //   else{
-  //      this.editingAnomaly = anomaly;
-  //   }
-  // }
 
 
   onSubmit() {
@@ -202,10 +186,7 @@ export class FormEpiComponent implements OnInit {
         emplacement: this.epiForm.get('emplacement')?.value,
         date_last_control: this.epiForm.get('dateLastControl')?.value,
         date_rebus: this.epiForm.get('dateRebus')?.value ? new Date(this.epiForm.get('dateRebus')?.value) : null,
-        anomaly: {
-          title: this.epiForm.get('anomalyName')?.value,
-          criticity: this.epiForm.get('anomalyCriticity')?.value
-        }
+        anomaly: this.anomaly
       };
 
       this.dialogRef.close(updatedEpi); // Return the updated EPI to the parent component

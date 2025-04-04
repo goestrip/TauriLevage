@@ -100,8 +100,8 @@
       <h4>Anomalies</h4>
       <button mat-raised-button color="accent" type="button"  (click)="addAnomaly()">Ajouter une anomalie</button>
     </div>
-    <div class="table-container" *ngIf="data?.epi?.anomaly">  
-      <app-anomaly-table [anomaly]="data?.epi?.anomaly"></app-anomaly-table>
+    <div class="table-container" *ngIf="anomaly">  
+      <app-anomaly-table [(anomaly)]="anomaly"></app-anomaly-table>
     </div>
   </div>
 

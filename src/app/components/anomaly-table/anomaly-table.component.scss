@@ -1,0 +1,38 @@
+.container{
+  //background-color: rgb(236, 243, 236);
+  border: 1px solid #ccc; /* Optional: Add a border around the container */
+  border-radius: 5px; /* Optional: Add rounded corners */
+  margin-bottom: 5px;
+  padding: 10px;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  row-gap: 2px;
+  column-gap: 10px; /* Space between columns */
+  //gap: 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.button-group {
+  margin-top: 0;
+  grid-column: span 3; /* Buttons span across both columns */
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1rem;
+}
+
+button {
+  grid-column: span 2; /* Buttons span across both columns */
+  margin-top: 1rem;
+}

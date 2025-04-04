@@ -13,29 +13,21 @@ impl Default for Criticity {
         Criticity::None
     }
 }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AnomalyType {
+    pub id: i32,
+    pub name: String,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Anomaly {
     pub id: i32,
-    pub title: String,
+    pub anomaly_type_id: i32,
     pub description: String,
     pub criticity: Criticity,
     pub is_handled: bool,
     pub date_detection: NaiveDate,
     pub date_resolution: Option<NaiveDate>,
-}
-impl Default for Anomaly {
-    fn default() -> Self {
-        Anomaly {
-            id: 0,
-            title: String::new(),
-            description: String::new(),
-            criticity: Criticity::None,
-            is_handled: false,
-            date_detection: NaiveDate::from_ymd_opt(2015, 2, 29).unwrap(),
-            date_resolution: None,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

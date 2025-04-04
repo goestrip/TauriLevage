@@ -1,44 +1,49 @@
+<div *ngIf="anomaly() as currentAnomaly" class="container">
+  <form [formGroup]="anomalyForm" (ngSubmit)="saveAnomaly()">
+    
+    <mat-form-field appearance="outline">
+        <mat-label>Date de détection</mat-label>
+        <input matInput [matDatepicker]="detectionPicker" formControlName="date_detection" />
+        <mat-datepicker-toggle matSuffix [for]="detectionPicker"></mat-datepicker-toggle>
+        <mat-datepicker #detectionPicker></mat-datepicker>
+    </mat-form-field>
 
-        "anomaly component works"
-    <!-- <table mat-table [dataSource]="anomalySources" class="mat-elevation-z8">
+    <mat-form-field appearance="outline">
+        <mat-label>Criticité</mat-label>
+        <mat-select formControlName="criticity" required>
+          @for (criticity of criticities; track criticity) {
+            <mat-option [value]="criticity">{{criticity}}</mat-option>
+          }
+        </mat-select>
+    </mat-form-field>
 
-      <ng-container matColumnDef="edition" [sticky]="true">
-        <th mat-header-cell *matHeaderCellDef>Edition</th>
-        <td mat-cell *matCellDef="let anomaly">
-          <button mat-icon-button type='button'  (click)="toggleEditRow(anomaly)">
-            <mat-icon [ngClass]="{ 'red-icon': editingAnomaly === anomaly }">
-              {{ editingAnomaly === anomaly ? 'save' : 'edit' }}
-            </mat-icon>
-          </button>
-        </td>
-      </ng-container>
+    <mat-form-field appearance="outline">
+        <mat-label>Date de résolution</mat-label>
+        <input matInput [matDatepicker]="resolutionPicker" formControlName="date_resolution" />
+        <mat-datepicker-toggle matSuffix [for]="resolutionPicker"></mat-datepicker-toggle>
+        <mat-datepicker #resolutionPicker></mat-datepicker>
+    </mat-form-field>
 
-      <ng-container matColumnDef="date_detection">
-        <th mat-header-cell *matHeaderCellDef> Detection </th>
-        <td mat-cell *matCellDef="let anomaly"> {{anomaly.date_detection|  date:'dd-MM-yyyy' }} </td>
-      </ng-container>
-      <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef> title </th>
-        <td mat-cell *matCellDef="let anomaly"> {{anomaly.title}} </td>
-      </ng-container>
+    <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="anomaly_type" required>
+          @for (type of anomalyTypes; track type) {
+            <mat-option [value]="type">{{type.name}}</mat-option>
+          }
+        </mat-select>
+    </mat-form-field>
 
-      <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef> description </th>
-        <td mat-cell *matCellDef="let anomaly"> {{anomaly.description}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="criticity">
-        <th mat-header-cell *matHeaderCellDef> criticity </th>
-        <td mat-cell *matCellDef="let anomaly"> {{anomaly.criticity}} </td>
-      </ng-container>
-      
-      <ng-container matColumnDef="date_resolution">
-        <th mat-header-cell *matHeaderCellDef> date_resolution </th>
-        <td mat-cell *matCellDef="let anomaly"> {{anomaly.date_resolution|  date:'dd-MM-yyyy' }} </td>
-      </ng-container>
-
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let anomaly; columns: displayedColumns;"></tr>
-    </table> -->
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
   
+    <div class="button-group">
+      <button mat-raised-button color="primary" type="submit" [disabled]="anomalyForm.invalid">Save</button>
+      <button mat-raised-button color="warn" type="button" (click)="cancelEdit()">Cancel</button>
+    </div>
+  </form>
+</div>
+<div *ngIf="!anomaly()">
+  <p>No anomaly selected.</p>
+</div>

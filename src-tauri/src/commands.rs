@@ -109,4 +109,16 @@ pub fn get_emplacement(state: State<AppConfigData>) -> Result<String, String> {
 
     Ok(serde_json::to_string(&emplacement).unwrap())
 }
+#[tauri::command]
+pub fn get_anomaly_types(state: State<AppConfigData>) -> Result<String, String> {
+    log::info!("get_anomaly_types");
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("No Database connection in state");
+        return Err("No Database connection ".to_string());
+    }
+    let anomaly_types = database::get_anomaly_types(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&anomaly_types).unwrap())
+}
 

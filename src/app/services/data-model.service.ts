@@ -6,6 +6,7 @@ import { EpiMateriel } from '../model/catalogMateriel';
 import { EpiDto } from '../model/dto/epiDto';
 import { People } from '../model/people';
 import { Emplacement } from '../model/emplacement';
+import { AnomalyType } from '../model/anomaly';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,7 @@ export class DataModelService {
   public materiels  = signal([] as EpiMateriel[]);
   public employees = signal([] as People[]);
   public locations = signal([] as Emplacement[]);
+  public anomalyTypes = signal([] as AnomalyType[]);
   public isDbLoaded = signal(false);
   public epiSource = new MatTableDataSource(this.epis);
 
@@ -36,20 +38,25 @@ export class DataModelService {
 
    public async loadDatabase(){
 
-    console.log("loadDatabase");
-    invoke<string>("init_database", {}).then((text) => {
-      console.log(text);
-    });
+    await(async () => {
+      console.log("loadDatabase");
+      invoke<string>("init_database", {}).then((text) => {
+        console.log(text);
+      });
 
-    invoke<string>("get_epi_materiel", {}).then((json) => {
-      const materiels: EpiMateriel[] = JSON.parse(json);
-      this.materiels.set(materiels);
-      console.log(materiels);
-    });
+      invoke<string>("get_epi_materiel", {}).then((json) => {
+        const materiels: EpiMateriel[] = JSON.parse(json);
+        this.materiels.set(materiels);
+        console.log(materiels);
+      });
+
+      invoke<string>("get_anomaly_types", {}).then((json) => {
+        const anomalyTypes: AnomalyType[] = JSON.parse(json);
+        this.anomalyTypes.set(anomalyTypes);
+        console.log(anomalyTypes);
+      });
 
    
-
-    await(async () => {
       const peopleJson = await invoke<string>("get_people", {});
       const people: People[] = JSON.parse(peopleJson);
       people.sort((a, b) => a.nom.localeCompare(b.nom));
@@ -61,10 +68,11 @@ export class DataModelService {
       this.locations.set(locations);
     })();
 
+
     invoke<string>("get_epi", {}).then((json) => {
       const epiDtos: EpiDto[] = JSON.parse(json);
       this.epis = epiDtos.map((epiDto) => {
-        return EpiDto.ToEpi(epiDto, this.materiels(), this.employees(), this.locations());
+        return EpiDto.ToEpi(epiDto, this.materiels(), this.employees(), this.locations(), this.anomalyTypes());
       });
 
 

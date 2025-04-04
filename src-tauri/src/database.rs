@@ -26,16 +26,25 @@ pub fn init_db(connection: &Connection) -> Result<()> {
         [],
     )?;
 
+
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS anomaly_type (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        )",
+        [],
+    )?;
     // Create table for anomalies
     connection.execute(
         "CREATE TABLE IF NOT EXISTS anomalies (
             id INTEGER PRIMARY KEY,
-            title TEXT NOT NULL,
+            anomaly_type_id INTEGER NOT NULL,
             description TEXT NOT NULL,
             criticity TEXT NOT NULL,
             is_handled BOOLEAN NOT NULL,
             date_detection TEXT NOT NULL,
-            date_resolution TEXT
+            date_resolution TEXT,
+            FOREIGN KEY(anomaly_type_id) REFERENCES anomaly_type(id)
         )",
         [],
     )?;
@@ -239,4 +248,24 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn get_anomaly_types(connection: &Option<Connection>) -> Result<Vec<crate::model::AnomalyType>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT id, name FROM anomaly_type")?;
+    let anomaly_type_iter = stmt.query_map([], |row| {
+        Ok(crate::model::AnomalyType {
+            id: row.get(0)?,
+            name: row.get(1)?,
+        })
+    })?;
+    Ok(anomaly_type_iter.collect::<Result<Vec<crate::model::AnomalyType>>>()?)
 }

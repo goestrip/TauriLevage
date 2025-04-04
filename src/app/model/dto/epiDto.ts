@@ -1,3 +1,4 @@
+import { AnomalyType } from "../anomaly";
 import { EpiMateriel } from "../catalogMateriel";
 import { Emplacement } from "../emplacement";
 import { Epi } from "../epi";
@@ -17,7 +18,7 @@ export class EpiDto{
     public date_last_control: Date|null = null;
     public date_rebus: Date|null = null;
     
-    public static ToEpi(dto:EpiDto, materiels: EpiMateriel[], employees: People[], locations:Emplacement[]):Epi{
+    public static ToEpi(dto:EpiDto, materiels: EpiMateriel[], employees: People[], locations:Emplacement[], anomalyTypes: AnomalyType[]):Epi{
        return Object.assign(new Epi(),{
             id: dto.id,
             serial: dto.serial,

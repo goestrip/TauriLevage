@@ -1,4 +1,4 @@
-import { Anomaly, GenerateRandomAnomaly } from "./anomaly";
+import { Anomaly } from "./anomaly";
 import { Emplacement } from "./emplacement";
 import { EpiMateriel } from "./catalogMateriel";
 import { People } from "./people";
@@ -58,17 +58,3 @@ export class Epi{
     }
 }
 
-export function GenerateRandomEpi():Epi{
-    const epi = new Epi();
-    epi.nature = new EpiMateriel(1, "stop chute");
-    epi.serial = uuidv4().toString().slice(0, 8);
-    epi.date_fabrication = getRandomDate(new Date(2014, 0, 1), new Date(2021, 0, 1));
-    epi.date_mise_en_service = getRandomDate(new Date(2021, 0, 1));
-    epi.validite_years = Math.floor(Math.random() * 4) + 6;
-    epi.assigned_to = null;
-    epi.emplacement = null;
-    epi.date_last_control = getRandomDate(new Date(2023, 0, 1));
-    epi.date_rebus = Math.random() < 0.4 ? epi.date_last_control  : null;
-    epi.anomaly = GenerateRandomAnomaly();
-    return epi;
-}
