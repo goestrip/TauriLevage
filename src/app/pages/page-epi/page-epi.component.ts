@@ -16,9 +16,6 @@ import { FormEpiComponent } from '../../forms/form-epi/form-epi.component';
 
 import { Epi } from '../../model/epi';
 import { DataModelService } from '../../services/data-model.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { EpiDataSource } from '../../services/dataSource';
 import { Criticity } from '../../model/criticity';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { EpiMateriel } from '../../model/catalogMateriel';
@@ -92,7 +89,7 @@ export class PageEpiComponent {
     const dialogRef = this.dialog.open(FormEpiComponent, {
       width: '900px',
       maxWidth: '90vw',
-      data: { formTitle: 'Edit EPI', epi: epi } // Pass the EPI to the dialog
+      data: { formTitle: 'Edition EPI', epi: epi } // Pass the EPI to the dialog
     });
 
 

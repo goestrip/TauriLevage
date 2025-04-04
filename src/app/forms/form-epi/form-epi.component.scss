@@ -7,6 +7,13 @@ form {
     margin-bottom: 16px; // Added margin at the bottom
 }
 
+.anomaly-header{
+    display: flex;
+    justify-content: space-between; // Space between the two elements
+    align-items: center; // Center vertically
+    margin: 0px; // Added margin at the bottom
+}
+
 h2 {
     text-align: center; // Center the title
 }
@@ -14,10 +21,24 @@ h2 {
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(300px, 1fr)); // Ensure each column has a minimum width of 200px
-    gap: 16px;
-    padding-top: 24px; // Added padding before the first row
+    row-gap: 8px;
+    column-gap: 20px; // Space between columns
+    padding-top: 5px; // Added padding before the first row
 }
 
 mat-form-field {
     width: 100%;
+}
+table {
+    width: 100%; // Ensure the table itself is 100% wide
+  }
+
+.table-container {
+    grid-column: span 2; // Make the table span two columns in the grid
+    width: 100%; // Ensure the table takes up the full width of the container
+    margin-top: 2px; // Add spacing between the grid and the table
+  }
+
+.red-icon {
+color: rgb(212, 25, 25); // Set the icon color to red
 }

@@ -87,7 +87,7 @@
       <mat-datepicker #rebusPicker></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
+    <!-- <mat-form-field appearance="outline">
       <mat-label>Anomalie (Anomaly)</mat-label>
       <input matInput formControlName="anomalyName" />
     </mat-form-field>
@@ -95,7 +95,14 @@
     <mat-form-field appearance="outline">
       <mat-label>Criticité (Criticity)</mat-label>
       <input matInput formControlName="anomalyCriticity" />
-    </mat-form-field>
+    </mat-form-field> -->
+    <div class="anomaly-header">
+      <h4>Anomalies</h4>
+      <button mat-raised-button color="accent" type="button"  (click)="addAnomaly()">Ajouter une anomalie</button>
+    </div>
+    <div class="table-container" *ngIf="data?.epi?.anomaly">  
+      <app-anomaly-table [anomaly]="data?.epi?.anomaly"></app-anomaly-table>
+    </div>
   </div>
 
   <button mat-raised-button color="primary" type="submit" [disabled]="!epiForm.valid">Enregistrer</button>

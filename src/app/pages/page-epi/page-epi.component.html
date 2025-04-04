@@ -63,19 +63,8 @@
   <ng-container matColumnDef="date_fabrication">
     <th mat-header-cell mat-sort-header *matHeaderCellDef> Fabrication</th>
     <td mat-cell *matCellDef="let epi">
-      <ng-container *ngIf="editingRow === epi; else staticSerial">
-        <div class="input-container">
-          <mat-form-field>
-            <input matInput [matDatepicker]="picker" [(ngModel)]="epi.date_fabrication" >
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </ng-container>
-      <ng-template #staticSerial>
-        {{epi.date_fabrication|  date:'dd-MM-yyyy' }} 
-      </ng-template>
-      </td>
+      {{epi.date_fabrication|  date:'dd-MM-yyyy' }} 
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="date_mise_en_service">

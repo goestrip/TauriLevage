@@ -11,6 +11,8 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
+import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+
 import { DataModelService } from '../../services/data-model.service';
 import { Epi } from '../../model/epi';
 import { predicateValidator } from '../validators/serial-validator';
@@ -18,6 +20,9 @@ import { People } from '../../model/people';
 import { Emplacement } from '../../model/emplacement';
 import { map, Observable, startWith } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
+import { Anomaly } from '../../model/anomaly';
+import { Criticity } from '../../model/criticity';
+import { AnomalyTableComponent } from '../../components/anomaly-table/anomaly-table.component';
 
 @Component({
   selector: 'app-form-epi',
@@ -29,7 +34,9 @@ import { MatIconModule } from '@angular/material/icon';
     MatDatepickerModule,
     MatAutocompleteModule,
     MatIconModule,
-    MatButtonModule,],
+    MatTableModule,
+    MatButtonModule,
+    AnomalyTableComponent],
     providers: [provideNativeDateAdapter()],
   templateUrl: './form-epi.component.html',
   styleUrl: './form-epi.component.scss'
@@ -37,6 +44,9 @@ import { MatIconModule } from '@angular/material/icon';
 export class FormEpiComponent implements OnInit {
   @Input() formTitle: string = ''; // Existing input property
   epiForm: FormGroup;
+
+  formEPI: Epi|null = null; // EPI form data
+
   epiMaterielList: EpiMateriel[] = [];
   peopleList: People[] = [];
   peopleFormControl = new FormControl();
@@ -44,6 +54,18 @@ export class FormEpiComponent implements OnInit {
 
   locationList: Emplacement[] = [];
   filteredLocations: Emplacement[] = [];
+
+  
+  displayedColumns: string[] = [
+    'edition',
+    'date_detection',
+    'title',
+    'description',
+    'criticity',
+    'date_resolution',
+    
+  ];
+  
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { formTitle?: string; epi?: Epi }, // Include EPI in dialog data
@@ -53,6 +75,9 @@ export class FormEpiComponent implements OnInit {
   ) {
     if (data?.formTitle) {
       this.formTitle = data.formTitle; // Set formTitle from dialog data if provided
+    }
+    if (data?.epi) {
+      this.formEPI = data.epi; // Set formEPI from dialog data if provided
     }
 
     this.epiForm = this.fb.group({
@@ -140,6 +165,28 @@ export class FormEpiComponent implements OnInit {
     displayFn(person: any): string {
       return person ? `${person.prenom} ${person.nom}` : '';
     }
+
+   addAnomaly() {
+  //   this.anomalySources.data = [...this.anomalySources.data,
+  //      Object.assign(new Anomaly(),{
+  //       id: this.anomalySources.data.length + 1,
+  //       title: 'title',
+  //       description: 'description',
+  //       criticity: Criticity.NORMAL,
+  //       date_detection: new Date(),
+  //       date_resolution: null}
+  //     )];
+   }
+
+  // toggleEditRow(anomaly: Anomaly) {
+  //   if (this.editingAnomaly === anomaly) {
+  //     this.editingAnomaly = null; // Stop editing if the same row is clicked again
+  //   }
+  //   else{
+  //      this.editingAnomaly = anomaly;
+  //   }
+  // }
+
 
   onSubmit() {
     if (this.epiForm.valid) {

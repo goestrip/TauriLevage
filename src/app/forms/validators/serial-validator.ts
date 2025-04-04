@@ -4,7 +4,6 @@ export function predicateValidator(predicate: (value: any) => boolean, errorKey:
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
     const isValid = predicate(value); // Call the predicate function with the control value
-    console.log("predicateValidator", value, isValid, errorKey);
     
     if (!isValid) {
       return { [errorKey]: true }; // Return an error object if the predicate fails
