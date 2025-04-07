@@ -32,7 +32,9 @@ pub fn run() {
             commands::get_epi_materiel,
             commands::get_people,
             commands::get_emplacement,
-            commands::get_anomaly_types
+            commands::get_anomaly_types,
+            commands::save_anomaly,
+            commands::get_anomalies,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

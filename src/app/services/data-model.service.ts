@@ -6,7 +6,8 @@ import { EpiMateriel } from '../model/catalogMateriel';
 import { EpiDto } from '../model/dto/epiDto';
 import { People } from '../model/people';
 import { Emplacement } from '../model/emplacement';
-import { AnomalyType } from '../model/anomaly';
+import { AnomalyType, Anomaly } from '../model/anomaly';
+import { AnomalyDto } from '../model/dto/anomalyDto';
 
 @Injectable({
   providedIn: 'root'
@@ -68,11 +69,20 @@ export class DataModelService {
       this.locations.set(locations);
     })();
 
+    let anomalies: Anomaly[] = [];
+    await invoke<string>("get_anomalies", {}).then((json) => {
+      const anomalyDtos: AnomalyDto[] = JSON.parse(json);
+      anomalies = anomalyDtos.map((anomalyDto) => {
+        return AnomalyDto.ToAnomaly(anomalyDto, this.anomalyTypes());
+      });
+    });
 
+
+   
     invoke<string>("get_epi", {}).then((json) => {
       const epiDtos: EpiDto[] = JSON.parse(json);
       this.epis = epiDtos.map((epiDto) => {
-        return EpiDto.ToEpi(epiDto, this.materiels(), this.employees(), this.locations(), this.anomalyTypes());
+        return EpiDto.ToEpi(epiDto, this.materiels(), this.employees(), this.locations(), anomalies);
       });
 
 
@@ -83,10 +93,11 @@ export class DataModelService {
     this.epiSource.filterPredicate = (data: Epi, filter: string) => {
       console.log("filterPredicate",data, filter);
       return data.serial.includes(filter)
-      || (data.nature?.nature.toLowerCase().includes(filter) ?? false)
-      || (data.assigned_to?.nom.toLowerCase().includes(filter) ?? false)
-      || (data.assigned_to?.prenom.toLowerCase().includes(filter) ?? false)
-      || (data.emplacement?.location.toLowerCase().includes(filter) ?? false)
+      || (data.nature?.nature?.toLowerCase().includes(filter) ?? false)
+      || (data.assigned_to?.nom?.toLowerCase().includes(filter) ?? false)
+      || (data.assigned_to?.prenom?.toLowerCase().includes(filter) ?? false)
+      || (data.emplacement?.location?.toLowerCase().includes(filter) ?? false)
+      || (data.anomaly?.anomaly_type?.name?.toLowerCase().includes(filter) ?? false)
     }
    }
 
@@ -99,7 +110,19 @@ export class DataModelService {
     this.saveEpi(newEpi);
    }
 
-   public saveEpi(epi: Epi){
+   public async saveEpi(epi: Epi){  
+    
+     if(epi.anomaly != null) {
+       const anomalyJson = JSON.stringify(AnomalyDto.FromAnomaly(epi.anomaly));
+       
+       console.log("sending anomaly to the back", anomalyJson);
+       await invoke<string>("save_anomaly", {anomaly: anomalyJson}).then((anomalyId) => {
+         console.log("anomaly saved, id = ",anomalyId);
+         epi.anomaly!.id = parseInt(anomalyId);
+        });
+      }
+      
+      
     const epiJson = JSON.stringify(EpiDto.FromEpi(epi));
     console.log("sending epi to the back", epiJson);
     invoke<string>("save_epi", {epi: epiJson}).then((text) => {

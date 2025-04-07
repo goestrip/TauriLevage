@@ -105,23 +105,39 @@ export class PageEpiComponent {
     this.dataService.saveEpi(epi); // Save the EPI to the data service
   }
 
-  validityOverdue(epi: Epi): string {
+  getValidityClass(epi: Epi): string {
     if (!epi.validiteLimite) {
       return '';
     }
-    const oneYearBeforeLimit = new Date(epi.validiteLimite);
-    oneYearBeforeLimit.setFullYear(oneYearBeforeLimit.getFullYear() - 1);
+    const twoMonthsBeforeLimit = new Date(epi.validiteLimite);
+    twoMonthsBeforeLimit.setMonth(twoMonthsBeforeLimit.getMonth() - 2);
 
     const now = new Date();
     
-    if (now >= oneYearBeforeLimit && now < epi.validiteLimite) {
-      return 'orange';
+    if (now >= twoMonthsBeforeLimit && now < epi.validiteLimite) {
+      return 'class-urgent';
     }
     else if (now >= epi.validiteLimite) {
-      return 'red';
+      return 'class-critical';
     }
     else{
       return '';
+    }
+  }
+
+  getControlClass(epi: Epi): string {
+    const controlDates = epi.WarningControlDate;
+    if (controlDates) {
+      const now = new Date();
+      if (now >= controlDates.warningDate && now < controlDates.overdueDate) {
+        return 'class-urgent'; // Warning state
+      } else if (now >= controlDates.overdueDate) {
+        return 'class-critical'; // Overdue state
+      } else {
+        return ''; // Normal state
+      }
+    } else {
+      return ''; // No control date available
     }
   }
   
@@ -166,6 +182,8 @@ export class PageEpiComponent {
         return 'class-urgent';
       case Criticity.CRITICAL:
         return 'class-critical';
+      case Criticity.PROCESSED:
+        return 'class-processed';
       default:
         return '';
     }

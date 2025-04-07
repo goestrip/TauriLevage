@@ -14,8 +14,16 @@ if(end === null){
     return randomTime;
 }
 
-const YEAR_TO_MS = 365 * 24 * 60 * 60 * 1000;
+const YEAR_TO_MS = 365 * 24 *3600 * 1000;
 
+export class ControlDates{
+    public warningDate: Date ;
+    public overdueDate: Date ;
+    constructor(warningDate: Date , overdueDate: Date){ 
+        this.warningDate = warningDate;
+        this.overdueDate = overdueDate;
+    }
+}
 
 export class Epi{
     public id: number = 0;
@@ -37,12 +45,26 @@ export class Epi{
     public date_rebus: Date|null = null;
     public anomaly: Anomaly |null = null;
 
+    public get WarningControlDate():ControlDates|null{
+        if(this.date_last_control){
+            let overdueDate = new Date(this.date_last_control);
+            overdueDate.setFullYear(overdueDate.getFullYear() + 1);
+            
+            let warningDate = new Date(overdueDate);
+            warningDate.setMonth(warningDate.getMonth() - 2);
+            return new ControlDates(warningDate ,overdueDate);
+        }
+        else return null;
+    }
+
     public static ComputeValiditeLimite(date_fabrication: Date | undefined, validite_years: number): Date | undefined {
         if(date_fabrication){
             return new Date(date_fabrication.getTime() + validite_years * YEAR_TO_MS);
         }
         return undefined;
     }
+
+
 
     public copyFrom(other: Epi): void {
         this.nature = other.nature;

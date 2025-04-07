@@ -1,4 +1,4 @@
-import { Component, Input, Inject, effect, OnInit } from '@angular/core';
+import { Component, Input, Inject, effect, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup,FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { EpiMateriel } from '../../model/catalogMateriel';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { provideNativeDateAdapter, DateAdapter } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
@@ -43,6 +43,8 @@ import { AnomalyTableComponent } from '../../components/anomaly-table/anomaly-ta
 })
 export class FormEpiComponent implements OnInit {
   @Input() formTitle: string = ''; // Existing input property
+
+  private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
   epiForm: FormGroup;
 
   formEPI: Epi|null = null; // EPI form data
@@ -74,11 +76,15 @@ export class FormEpiComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<FormEpiComponent> // Inject MatDialogRef
   ) {
+
+    this._adapter.setLocale('fr-FR'); // Set locale for date adapter
+
     if (data?.formTitle) {
       this.formTitle = data.formTitle; // Set formTitle from dialog data if provided
     }
     if (data?.epi) {
       this.formEPI = data.epi; // Set formEPI from dialog data if provided
+      this.anomaly = data.epi.anomaly; // Set anomaly from EPI data if provided
     }
 
     this.epiForm = this.fb.group({
@@ -115,13 +121,13 @@ export class FormEpiComponent implements OnInit {
     this.epiForm.get('validiteYears')?.valueChanges.subscribe(() => this.calculateValidityLimit());
     this.epiForm.get('fabricationDate')?.valueChanges.subscribe(() => this.calculateValidityLimit());
 
-    // Preset activationDate to fabricationDate when editing activationDate
-    this.epiForm.get('fabricationDate')?.valueChanges.subscribe((fabricationDate) => {
-      const activationDate = this.epiForm.get('activationDate')?.value;
-      if (!activationDate && fabricationDate) {
-        this.epiForm.get('activationDate')?.setValue(fabricationDate);
-      }
-    });
+    // // Preset activationDate to fabricationDate when editing activationDate
+    // this.epiForm.get('fabricationDate')?.valueChanges.subscribe((fabricationDate) => {
+    //   const activationDate = this.epiForm.get('activationDate')?.value;
+    //   if (!activationDate && fabricationDate) {
+    //     this.epiForm.get('activationDate')?.setValue(fabricationDate);
+    //   }
+    // });
 
     this.peopleFormControl.setValue(this.data?.epi?.assigned_to || null); // Set the initial value for peopleFormControl
 

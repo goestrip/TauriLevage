@@ -6,7 +6,7 @@ export class AnomalyType{
 }
 
 export class Anomaly{
-    public id: number = 0;
+    public id: number|null = null;
     public anomaly_type: AnomalyType|null = null;
     public description: string = '';
     public criticity: Criticity = Criticity.NONE;

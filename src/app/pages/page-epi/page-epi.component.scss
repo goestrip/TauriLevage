@@ -26,23 +26,27 @@
     background-color: rgb(255, 255, 255);
   }
 
-  .class-urgent{
-    background-color: rgb(241, 163, 17);
-    color: rgb(243, 243, 243);
-  }
-  .class-critical{
-    background-color: rgb(218, 54, 54);
-    color: rgb(243, 243, 243);
-  }
   .class-rebus{
     //background-color: rgb(218, 54, 54);
     color: rgb(255, 105, 105);
   }
   .class-row-rebus{
-    color: rgb(169, 169, 169);
+    color: rgb(218, 215, 215);
     background-color: rgb(105, 19, 19);
   }
 
+  .class-urgent{
+    background-color: rgb(241, 163, 17);
+    //color: rgb(243, 243, 243);
+  }
+  .class-critical{
+    background-color: rgb(218, 54, 54);
+    color: rgb(243, 243, 243);
+  }
+  .class-processed{
+    background-color: rgb(158, 221, 158);
+    //color: rgb(0, 0, 0);
+  }
   .input-container {
     display: flex;
     align-items: center;

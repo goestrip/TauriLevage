@@ -56,6 +56,17 @@ export class AnomalyTableComponent {
     if (this.anomaly()) {
       this.anomalyForm.patchValue(this.anomaly()!); // Populate the form with anomaly data
     }
+
+    this.anomalyForm.valueChanges.subscribe((formValue) => {
+      this.anomaly.update(() => ({
+        ...this.anomaly(),
+        ...formValue
+      }));
+    });
+
+    this.anomalyForm.get('date_resolution')?.valueChanges.subscribe((value) => {
+      this.anomalyForm.get('criticity')?.setValue(Criticity.PROCESSED);
+    });
   }
 
   saveAnomaly(): void {

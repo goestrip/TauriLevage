@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 use tauri::State;
 
-use crate::{database, model::Epi, state::AppConfigData};
+use crate::{database, model::Epi, model::Anomaly, state::AppConfigData};
 
 #[tauri::command]
 pub fn has_database(state: State<AppConfigData>) -> Result<bool, String> {
@@ -120,5 +120,39 @@ pub fn get_anomaly_types(state: State<AppConfigData>) -> Result<String, String> 
     let anomaly_types = database::get_anomaly_types(&connection).map_err(|e| e.to_string())?;
 
     Ok(serde_json::to_string(&anomaly_types).unwrap())
+}
+#[tauri::command]
+pub fn save_anomaly(state: State<AppConfigData>,anomaly: String,) -> Result<String, String> {
+    log::info!("save_anomaly {}", anomaly);
+    let anomaly_parsed: Anomaly = serde_json::from_str(&anomaly).unwrap();
+
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("Database connection is None");
+        return Err("Database connection is None".to_string());
+    }
+    let saved = database::save_anomaly(&connection, &anomaly_parsed);
+    let mut inserted_id: i32 = 0;
+    match saved {
+        Ok(id) => {
+            log::info!("Anomaly saved with id {}", id);
+            inserted_id = id;
+        }
+        Err(e) => log::error!("Error saving anomaly: {}", e),
+    }
+
+    Ok(inserted_id.to_string())
+}
+#[tauri::command]
+pub fn get_anomalies(state: State<AppConfigData>) -> Result<String, String> {
+    log::info!("get_anomalies");
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("No Database connection in state");
+        return Err("No Database connection ".to_string());
+    }
+    let anomalies = database::get_all_anomalies(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&anomalies).unwrap())
 }
 

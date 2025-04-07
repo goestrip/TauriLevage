@@ -1,4 +1,4 @@
-import { AnomalyType } from "../anomaly";
+import { Anomaly } from "../anomaly";
 import { EpiMateriel } from "../catalogMateriel";
 import { Emplacement } from "../emplacement";
 import { Epi } from "../epi";
@@ -12,13 +12,14 @@ export class EpiDto{
     public date_fabrication: number = 0;
     public date_mise_en_service: number = 0;
     public validite_years: number = 10;
-    public validiteLimite: Date | undefined;
+    public validiteLimite: number | undefined;
     public assigned_to_id: number|null = null;
     public emplacement_id: number|null = null;
-    public date_last_control: Date|null = null;
-    public date_rebus: Date|null = null;
+    public date_last_control: number|null = null;
+    public date_rebus: number|null = null;
+    public anomaly_id: number|null = null;
     
-    public static ToEpi(dto:EpiDto, materiels: EpiMateriel[], employees: People[], locations:Emplacement[], anomalyTypes: AnomalyType[]):Epi{
+    public static ToEpi(dto:EpiDto, materiels: EpiMateriel[], employees: People[], locations:Emplacement[], anomalies: Anomaly[]):Epi{
        return Object.assign(new Epi(),{
             id: dto.id,
             serial: dto.serial,
@@ -29,6 +30,8 @@ export class EpiDto{
             date_rebus: dto.date_rebus ? new Date(dto.date_rebus) : null,
             assigned_to: employees.find(l => l.id == dto.assigned_to_id) || null,
             emplacement: locations.find(e => e.id == dto.emplacement_id) || null,
+            date_last_control: dto.date_last_control ? new Date(dto.date_last_control) : null,
+            anomaly: anomalies.find(a => a.id == dto.anomaly_id) || null,
        });
     }
 
@@ -44,6 +47,7 @@ export class EpiDto{
             emplacement_id: epi.emplacement?.id || null,
             date_last_control: epi.date_last_control ? epi.date_last_control.getTime() : null,
             date_rebus: epi.date_rebus ? epi.date_rebus.getTime() : null,
+            anomaly_id: epi.anomaly?.id || null,
         });
     }
 }

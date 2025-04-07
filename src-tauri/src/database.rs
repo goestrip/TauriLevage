@@ -1,6 +1,6 @@
 use rusqlite::{named_params, Connection, Result};
 
-use crate::model::{Epi, EpiMateriel, People};
+use crate::model::{self, Epi, EpiMateriel, People};
 
 //open a sqlite db
 pub fn open_db(path: &str) -> Result<Connection> {
@@ -40,8 +40,7 @@ pub fn init_db(connection: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             anomaly_type_id INTEGER NOT NULL,
             description TEXT NOT NULL,
-            criticity TEXT NOT NULL,
-            is_handled BOOLEAN NOT NULL,
+            criticity INTEGER NOT NULL,
             date_detection TEXT NOT NULL,
             date_resolution TEXT,
             FOREIGN KEY(anomaly_type_id) REFERENCES anomaly_type(id)
@@ -191,10 +190,11 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 date_mise_en_service = :date_mise_en_service,
                 date_fabrication = :date_fabrication, 
                 validite_years = :validite_years ,
+                assigned_to_id = :assigned_to_id,
+                emplacement_id = :emplacement_id,
                 date_last_control = :date_last_control,
                 date_rebus = :date_rebus,
-                assigned_to_id = :assigned_to_id,
-                emplacement_id = :emplacement_id
+                anomaly_id = :anomaly_id
              WHERE id = :id",
             named_params! {
                 ":id": id,
@@ -206,7 +206,8 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 ":assigned_to_id": epi.assigned_to_id,
                 ":emplacement_id": epi.emplacement_id,
                 ":date_last_control": epi.date_last_control.unwrap_or_default(),
-                ":date_rebus": epi.date_rebus.unwrap_or_default()
+                ":date_rebus": epi.date_rebus.unwrap_or_default(),
+                ":anomaly_id": epi.anomaly_id.unwrap_or_default()
             },
         )?;
     } else {
@@ -218,20 +219,22 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 date_mise_en_service, 
                 date_fabrication, 
                 validite_years, 
-                date_last_control, 
-                date_rebus,
                 assigned_to_id ,
-                emplacement_id 
+                date_last_control, 
+                emplacement_id, 
+                date_rebus,
+                anomaly_id
             ) VALUES (
                 :nature_id, 
                 :serial, 
                 :date_mise_en_service, 
                 :date_fabrication, 
                 :validite_years, 
-                :date_last_control, 
-                :date_rebus,
                 :assigned_to_id,
-                :emplacement_id
+                :date_last_control, 
+                :emplacement_id,
+                :date_rebus,
+                :anomaly_id
             )",
             named_params! {
                 ":nature_id": epi.nature_id,
@@ -243,6 +246,7 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 ":date_rebus": epi.date_rebus.unwrap_or_default(),
                 ":assigned_to_id": epi.assigned_to_id,
                 ":emplacement_id": epi.emplacement_id,
+                ":anomaly_id": epi.anomaly_id.unwrap_or_default()
             },
         )?;
     }
@@ -268,4 +272,102 @@ pub fn get_anomaly_types(connection: &Option<Connection>) -> Result<Vec<crate::m
         })
     })?;
     Ok(anomaly_type_iter.collect::<Result<Vec<crate::model::AnomalyType>>>()?)
+}
+
+pub fn save_anomaly(connection: &Option<Connection>, anomaly: &model::Anomaly) -> Result<(i32)> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+    log::info!("save_anomaly {:?}", anomaly);
+
+    if let Some(id) = anomaly.id {
+        // Update existing record
+        if let Err(e) =connection.execute(
+            "UPDATE anomalies SET 
+                anomaly_type_id = :anomaly_type_id, 
+                description = :description, 
+                criticity = :criticity, 
+                date_detection = :date_detection, 
+                date_resolution = :date_resolution
+             WHERE id = :id",
+            named_params! {
+                ":id": id,
+                ":anomaly_type_id": anomaly.anomaly_type_id,
+                ":description": anomaly.description,
+                ":criticity": anomaly.criticity,
+                ":date_detection": anomaly.date_detection.to_string(),
+                ":date_resolution": anomaly.date_resolution.unwrap_or_default()
+            },
+        ){
+            log::error!("Failed to insert anomaly: {:?}", e);
+            return Err(e);
+        }
+        Ok(id)
+    } else {
+        // Insert new record
+        if let Err(e) = connection.execute(
+            "INSERT INTO anomalies (
+                anomaly_type_id, 
+                description, 
+                criticity, 
+                date_detection, 
+                date_resolution
+            ) VALUES (
+                :anomaly_type_id, 
+                :description, 
+                :criticity, 
+                :date_detection, 
+                :date_resolution
+            )",
+            named_params! {
+                ":anomaly_type_id": anomaly.anomaly_type_id,
+                ":description": anomaly.description,
+                ":criticity": anomaly.criticity,
+                ":date_detection": anomaly.date_detection.to_string(),
+                ":date_resolution": anomaly.date_resolution.unwrap_or_default()
+            },
+        ){
+            log::error!("Failed to update anomaly: {:?}", e);
+            return Err(e);
+        };
+        // Retrieve the last inserted ID
+        let last_id = connection.last_insert_rowid();
+        log::info!("Last inserted ID: {}", last_id);
+        // Return the anomaly with the last inserted ID
+        Ok(last_id as i32)
+    }
+}   
+
+pub fn get_all_anomalies(connection: &Option<Connection>) -> Result<Vec<crate::model::Anomaly>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT * FROM anomalies")?;
+    let anomaly_iter = stmt.query_map([], |row| {
+        Ok(crate::model::Anomaly {
+            id: Some(row.get(0)?),
+            anomaly_type_id: row.get(1)?,
+            description: row.get(2)?,
+            criticity: row.get(3)?,
+            date_detection: row.get(4)?,
+            date_resolution: row.get(5)?,
+        })
+    })
+    .map_err(|e| {
+        log::error!("Error querying anomalies: {:?}", e);
+        rusqlite::Error::QueryReturnedNoRows
+    })?;
+    
+    Ok(anomaly_iter.collect::<Result<Vec<crate::model::Anomaly>>>()?)
 }
