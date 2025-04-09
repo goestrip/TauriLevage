@@ -82,9 +82,9 @@ pub struct Epi {
     pub id: Option<i32>,
     pub nature_id: i32,
     pub serial: String,
-    pub date_mise_en_service: i64, //timestamp
-    pub date_fabrication: i64,     //timestamp
-    pub validite_years: i32,
+    pub date_mise_en_service: Option<i64>, //timestamp
+    pub date_fabrication: Option<i64>,     //timestamp
+    pub validite_years: Option<i32>,
     pub assigned_to_id: Option<i32>,
     pub emplacement_id: Option<i32>,
     pub date_last_control: Option<i64>,

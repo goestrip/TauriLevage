@@ -63,9 +63,9 @@ pub fn init_db(connection: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             nature_id INTEGER NOT NULL,
             serial TEXT NOT NULL,
-            date_mise_en_service INTEGER NOT NULL,
-            date_fabrication INTEGER NOT NULL,
-            validite_years INTEGER NOT NULL,
+            date_mise_en_service INTEGER NULL,
+            date_fabrication INTEGER NULL,
+            validite_years INTEGER NULL,
             assigned_to_id INTEGER,
             emplacement_id INTEGER,
             date_last_control INTEGER,
@@ -75,7 +75,9 @@ pub fn init_db(connection: &Connection) -> Result<()> {
             FOREIGN KEY(nature_id) REFERENCES epi_materiel(id),
             FOREIGN KEY(assigned_to_id) REFERENCES people(id),
             FOREIGN KEY(emplacement_id) REFERENCES emplacement(id)
-        )",
+        );
+        CREATE UNIQUE INDEX idx_serial ON epi (serial);
+        ",
         [],
     )?;
 
@@ -200,14 +202,14 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
                 ":id": id,
                 ":nature_id": epi.nature_id,
                 ":serial": epi.serial,
-                ":date_mise_en_service": epi.date_mise_en_service.to_string(),
-                ":date_fabrication": epi.date_fabrication.to_string(),
+                ":date_mise_en_service": epi.date_mise_en_service,
+                ":date_fabrication": epi.date_fabrication,
                 ":validite_years": epi.validite_years,
                 ":assigned_to_id": epi.assigned_to_id,
                 ":emplacement_id": epi.emplacement_id,
-                ":date_last_control": epi.date_last_control.unwrap_or_default(),
-                ":date_rebus": epi.date_rebus.unwrap_or_default(),
-                ":anomaly_id": epi.anomaly_id.unwrap_or_default()
+                ":date_last_control": epi.date_last_control,
+                ":date_rebus": epi.date_rebus,
+                ":anomaly_id": epi.anomaly_id
             },
         )?;
     } else {
@@ -239,14 +241,14 @@ pub fn save_epi(connection: &Option<Connection>, epi: &Epi) -> Result<()> {
             named_params! {
                 ":nature_id": epi.nature_id,
                 ":serial": epi.serial,
-                ":date_mise_en_service": epi.date_mise_en_service.to_string(),
-                ":date_fabrication": epi.date_fabrication.to_string(),
+                ":date_mise_en_service": epi.date_mise_en_service,
+                ":date_fabrication": epi.date_fabrication,
                 ":validite_years": epi.validite_years,
-                ":date_last_control": epi.date_last_control.unwrap_or_default(),
-                ":date_rebus": epi.date_rebus.unwrap_or_default(),
+                ":date_last_control": epi.date_last_control,
+                ":date_rebus": epi.date_rebus,
                 ":assigned_to_id": epi.assigned_to_id,
                 ":emplacement_id": epi.emplacement_id,
-                ":anomaly_id": epi.anomaly_id.unwrap_or_default()
+                ":anomaly_id": epi.anomaly_id
             },
         )?;
     }

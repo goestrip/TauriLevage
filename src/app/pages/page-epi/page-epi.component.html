@@ -1,5 +1,5 @@
 <div class="filter-container">
-  <mat-form-field floatLabel="always">
+  <mat-form-field id="searchFilter" floatLabel="always">
     <mat-label>Filter</mat-label>
     <input matInput (keyup)="applyFilter($event)" [(ngModel)]="filter" placeholder="Rechercher" #input>
     @if (filter) {
@@ -9,6 +9,14 @@
     }
   </mat-form-field>
   
+  <div class="spacer"></div> <!-- Add a spacer to push the button to the end -->
+  
+  <div class="import-container">
+    <button mat-raised-button color="primary" (click)="fileInput.click()">
+      Import CSV
+    </button>
+    <input type="file" #fileInput accept=".csv" style="display: none;" (change)="handleFileInput($event)">
+  </div>
 </div>
 
 <table mat-table matSort  [dataSource]="epiData" (matSortChange)="announceSortChange($event)">

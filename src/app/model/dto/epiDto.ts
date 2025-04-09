@@ -51,3 +51,19 @@ export class EpiDto{
         });
     }
 }
+
+export class EpiCsvDto{
+    public nature: string = '';
+    public serial: string = '';
+    public date_fabrication: string = '';
+    public date_mise_en_service: string = '';
+    public validite_years: number = 10;
+    public validiteLimite: string = '';
+    public assigned_to: string|null = null;
+    public secteur: string|null = null;
+    public date_last_control: string|null = null;
+    public date_rebus: string|null = null;
+    public anomaly_name: string|null = null;
+    public anomaly_criticity: string|null = null;
+    public date_resolution: string|null = null;
+}

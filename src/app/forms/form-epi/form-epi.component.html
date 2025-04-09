@@ -1,16 +1,6 @@
 <h2>{{ formTitle }}</h2>
 <form [formGroup]="epiForm" (ngSubmit)="onSubmit()">
   <div class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Numéro de série</mat-label>
-      <input matInput formControlName="serialNumber" />
-      <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('required')">
-        numéro nécessaire.
-      </mat-error>
-      <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('alreadyExists')">
-        Déja utilisé.
-      </mat-error>
-    </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Nature</mat-label>
@@ -22,11 +12,15 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Date de fabrication</mat-label>
-      <input matInput [matDatepicker]="fabricationPicker" formControlName="fabricationDate" />
-      <mat-datepicker-toggle matSuffix [for]="fabricationPicker"></mat-datepicker-toggle>
-      <mat-datepicker #fabricationPicker></mat-datepicker>
-    </mat-form-field>
+      <mat-label>Numéro de série</mat-label>
+      <input matInput formControlName="serialNumber" />
+      <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('required')">
+        numéro nécessaire.
+      </mat-error>
+      <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('alreadyExists')">
+        Déja utilisé.
+      </mat-error>
+    </mat-form-field> 
 
     <mat-form-field appearance="outline">
       <mat-label>Mise en service</mat-label>
@@ -34,6 +28,15 @@
       <mat-datepicker-toggle matSuffix [for]="activationPicker"></mat-datepicker-toggle>
       <mat-datepicker #activationPicker></mat-datepicker>
     </mat-form-field>
+
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date de fabrication</mat-label>
+      <input matInput [matDatepicker]="fabricationPicker" formControlName="fabricationDate" />
+      <mat-datepicker-toggle matSuffix [for]="fabricationPicker"></mat-datepicker-toggle>
+      <mat-datepicker #fabricationPicker></mat-datepicker>
+    </mat-form-field>
+
 
     <mat-form-field appearance="outline">
       <mat-label>Durée Validité (années)</mat-label>
@@ -96,10 +99,10 @@
       <mat-label>Criticité (Criticity)</mat-label>
       <input matInput formControlName="anomalyCriticity" />
     </mat-form-field> -->
-    <div class="anomaly-header">
+    <!-- <div class="anomaly-header">
       <h4>Anomalies</h4>
       <button mat-raised-button color="accent" type="button"  (click)="addAnomaly()">Ajouter une anomalie</button>
-    </div>
+    </div> -->
     <div class="table-container" *ngIf="anomaly">  
       <app-anomaly-table [(anomaly)]="anomaly"></app-anomaly-table>
     </div>

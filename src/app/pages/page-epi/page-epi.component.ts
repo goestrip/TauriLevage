@@ -188,5 +188,23 @@ export class PageEpiComponent {
         return '';
     }
   }
+
+  importCsv() {
+    // Implement CSV import functionality here
+    console.log('Importing CSV...');
+  }
+
+  handleFileInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvData = e.target?.result as string;
+        this.dataService.parseCsvData(csvData);
+      };
+      reader.readAsText(file);
+    }
+  }
   
 }

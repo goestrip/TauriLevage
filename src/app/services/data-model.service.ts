@@ -3,7 +3,7 @@ import { Epi } from '../model/epi';
 import { MatTableDataSource } from '@angular/material/table';
 import { invoke } from "@tauri-apps/api/core";
 import { EpiMateriel } from '../model/catalogMateriel';
-import { EpiDto } from '../model/dto/epiDto';
+import { EpiCsvDto, EpiDto } from '../model/dto/epiDto';
 import { People } from '../model/people';
 import { Emplacement } from '../model/emplacement';
 import { AnomalyType, Anomaly } from '../model/anomaly';
@@ -92,7 +92,8 @@ export class DataModelService {
     
     this.epiSource.filterPredicate = (data: Epi, filter: string) => {
       console.log("filterPredicate",data, filter);
-      return data.serial.includes(filter)
+
+      return data.serial.toLowerCase().includes(filter)
       || (data.nature?.nature?.toLowerCase().includes(filter) ?? false)
       || (data.assigned_to?.nom?.toLowerCase().includes(filter) ?? false)
       || (data.assigned_to?.prenom?.toLowerCase().includes(filter) ?? false)
@@ -132,6 +133,35 @@ export class DataModelService {
 
    public epiSerialExists(serial: string): boolean {
     return this.epis.some((epi) => epi.serial === serial);
+   }
+
+   public parseCsvData(csvData: string): EpiCsvDto[] {
+    const lines = csvData.split('\n');
+    const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
+    const epis: EpiCsvDto[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(value => value.trim());
+      if (values.length !== headers.length || values[1].length == 0) continue; // Skip if the number of values doesn't match the number of headers
+
+      const epiCsv: EpiCsvDto = new EpiCsvDto();
+      epiCsv.nature = values[0];
+      epiCsv.serial = values[1];
+      epiCsv.date_mise_en_service = values[2];
+      epiCsv.date_fabrication = values[3];
+      epiCsv.validite_years = parseInt(values[4]);
+      epiCsv.validiteLimite = values[5];
+      epiCsv.assigned_to = values[6];
+      epiCsv.secteur = values[7];
+      epiCsv.date_last_control = values[8];
+      epiCsv.date_rebus = values[9];
+      epiCsv.anomaly_name = values[10];
+      epiCsv.anomaly_criticity = values[11];
+      epiCsv.date_resolution = values[12];
+      epis.push(epiCsv);
+    }
+
+    return epis;
    }
 
 }

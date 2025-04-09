@@ -23,6 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Anomaly } from '../../model/anomaly';
 import { Criticity } from '../../model/criticity';
 import { AnomalyTableComponent } from '../../components/anomaly-table/anomaly-table.component';
+import { GenerateSerialNumber } from '../../model/helpers';
 
 @Component({
   selector: 'app-form-epi',
@@ -48,7 +49,7 @@ export class FormEpiComponent implements OnInit {
   epiForm: FormGroup;
 
   formEPI: Epi|null = null; // EPI form data
-  anomaly : Anomaly|null = null; // Anomaly data
+  anomaly : Anomaly|null = new Anomaly(); // Anomaly data
 
   epiMaterielList: EpiMateriel[] = [];
   peopleList: People[] = [];
@@ -89,15 +90,15 @@ export class FormEpiComponent implements OnInit {
 
     this.epiForm = this.fb.group({
       serialNumber: [data?.epi?.serial || '', [
-         Validators.required,
+         Validators.required, Validators.max(100),
          predicateValidator((value) =>
            this.data.epi?.serial == value ||
            (this.data.epi?.serial != value && !this.dataService.epiSerialExists(value)),
           'alreadyExists') ]],
       nature: [data?.epi?.nature || '', Validators.required],
-      fabricationDate: [data?.epi?.date_fabrication || '', Validators.required],
-      activationDate: [data?.epi?.date_mise_en_service || '', Validators.required],
-      validiteYears: [data?.epi?.validite_years || 5, [Validators.required, Validators.min(0), Validators.max(100)]],
+      fabricationDate: [data?.epi?.date_fabrication || ''],
+      activationDate: [data?.epi?.date_mise_en_service || ''],
+      validiteYears: [data?.epi?.validite_years || 10, [Validators.min(0), Validators.max(100)]],
       validiteLimite: [{ value: data?.epi?.validiteLimite || '', disabled: true }],
       assigned_to: this.peopleFormControl,
       emplacement: [data?.epi?.emplacement || ''],
@@ -121,13 +122,17 @@ export class FormEpiComponent implements OnInit {
     this.epiForm.get('validiteYears')?.valueChanges.subscribe(() => this.calculateValidityLimit());
     this.epiForm.get('fabricationDate')?.valueChanges.subscribe(() => this.calculateValidityLimit());
 
-    // // Preset activationDate to fabricationDate when editing activationDate
-    // this.epiForm.get('fabricationDate')?.valueChanges.subscribe((fabricationDate) => {
-    //   const activationDate = this.epiForm.get('activationDate')?.value;
-    //   if (!activationDate && fabricationDate) {
-    //     this.epiForm.get('activationDate')?.setValue(fabricationDate);
-    //   }
-    // });
+    this.epiForm.get('nature')?.valueChanges.subscribe((value) =>{
+        const serial = GenerateSerialNumber(value.nature);
+        this.epiForm.get('serialNumber')?.setValue(serial);
+      });
+    // Preset activationDate to fabricationDate when editing activationDate
+    this.epiForm.get('fabricationDate')?.valueChanges.subscribe((fabricationDate) => {
+      const activationDate = this.epiForm.get('activationDate')?.value;
+      if (!activationDate && fabricationDate) {
+        this.epiForm.get('activationDate')?.setValue(fabricationDate);
+      }
+    });
 
     this.peopleFormControl.setValue(this.data?.epi?.assigned_to || null); // Set the initial value for peopleFormControl
 
