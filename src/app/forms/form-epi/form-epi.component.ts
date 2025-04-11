@@ -11,6 +11,8 @@ import { provideNativeDateAdapter, DateAdapter } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
+import { confirm } from "@tauri-apps/plugin-dialog";
+
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 
 import { DataModelService } from '../../services/data-model.service';
@@ -49,7 +51,7 @@ export class FormEpiComponent implements OnInit {
   epiForm: FormGroup;
 
   formEPI: Epi|null = null; // EPI form data
-  anomaly : Anomaly|null = new Anomaly(); // Anomaly data
+  anomaly : Anomaly|null = null; // Anomaly data
 
   epiMaterielList: EpiMateriel[] = [];
   peopleList: People[] = [];
@@ -90,7 +92,7 @@ export class FormEpiComponent implements OnInit {
 
     this.epiForm = this.fb.group({
       serialNumber: [data?.epi?.serial || '', [
-         Validators.required, Validators.max(100),
+         Validators.required, Validators.maxLength(100),
          predicateValidator((value) =>
            this.data.epi?.serial == value ||
            (this.data.epi?.serial != value && !this.dataService.epiSerialExists(value)),
@@ -133,6 +135,11 @@ export class FormEpiComponent implements OnInit {
         this.epiForm.get('activationDate')?.setValue(fabricationDate);
       }
     });
+
+    let serialControl = this.epiForm.get('serialNumber');
+    serialControl?.valueChanges.subscribe((serialNumber) => {
+      console.log(serialControl?.errors);
+  });
 
     this.peopleFormControl.setValue(this.data?.epi?.assigned_to || null); // Set the initial value for peopleFormControl
 
@@ -181,7 +188,12 @@ export class FormEpiComponent implements OnInit {
 
    }
 
-
+  async onDelete() {
+    if (await confirm('Êtes-vous sûr de vouloir supprimer cet EPI ?')) {
+      this.dataService.deleteEpi(this.formEPI); // Delete the EPI from the data service
+      this.dialogRef.close(null); // Indicate deletion to the parent component
+    }
+  }
 
   onSubmit() {
     if (this.epiForm.valid) {
@@ -189,13 +201,13 @@ export class FormEpiComponent implements OnInit {
         ...this.data.epi,
         serial: this.epiForm.get('serialNumber')?.value,
         nature: this.epiForm.get('nature')?.value,
-        date_fabrication: new Date(this.epiForm.get('fabricationDate')?.value),
-        date_mise_en_service: new Date(this.epiForm.get('activationDate')?.value),
+        date_fabrication: this.epiForm.get('fabricationDate')?.value ? new Date(this.epiForm.get('fabricationDate')?.value) : null,
+        date_mise_en_service: this.epiForm.get('activationDate')?.value ? new Date(this.epiForm.get('activationDate')?.value) : null,
         validite_years: this.epiForm.get('validiteYears')?.value,
-        validiteLimite: new Date(this.epiForm.get('validiteLimite')?.value),
+        validiteLimite: this.epiForm.get('validiteLimite')?.value ? new Date(this.epiForm.get('validiteLimite')?.value) : null,
         assigned_to: this.epiForm.get('assigned_to')?.value,
         emplacement: this.epiForm.get('emplacement')?.value,
-        date_last_control: this.epiForm.get('dateLastControl')?.value,
+        date_last_control: this.epiForm.get('dateLastControl')?.value ? new Date(this.epiForm.get('dateLastControl')?.value) : null,
         date_rebus: this.epiForm.get('dateRebus')?.value ? new Date(this.epiForm.get('dateRebus')?.value) : null,
         anomaly: this.anomaly
       };

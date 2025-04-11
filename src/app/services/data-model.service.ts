@@ -104,16 +104,13 @@ export class DataModelService {
 
    public addEpi(newEpi?: Epi) {
     if (!newEpi) return;
-
     this.epis.unshift(newEpi);
     this.epiSource.data = this.epis;
-
     this.saveEpi(newEpi);
    }
 
    public async saveEpi(epi: Epi){  
-    
-     if(epi.anomaly != null) {
+    if(epi.anomaly != null) {
        const anomalyJson = JSON.stringify(AnomalyDto.FromAnomaly(epi.anomaly));
        
        console.log("sending anomaly to the back", anomalyJson);
@@ -122,8 +119,7 @@ export class DataModelService {
          epi.anomaly!.id = parseInt(anomalyId);
         });
       }
-      
-      
+    
     const epiJson = JSON.stringify(EpiDto.FromEpi(epi));
     console.log("sending epi to the back", epiJson);
     invoke<string>("save_epi", {epi: epiJson}).then((text) => {
@@ -131,9 +127,11 @@ export class DataModelService {
     });
    }
 
+
    public epiSerialExists(serial: string): boolean {
     return this.epis.some((epi) => epi.serial === serial);
    }
+
 
    public parseCsvData(csvData: string): EpiCsvDto[] {
     const lines = csvData.split('\n');
@@ -164,4 +162,20 @@ export class DataModelService {
     return epis;
    }
 
+
+   public deleteEpi(epi: Epi|null) {
+    if (!epi) return;
+    const epi_id = epi.id.toString();
+    
+    invoke<string>("delete_epi", {id: epi_id}).then((isDeleted) => {
+      if (isDeleted ) {
+        console.log("EPI deleted successfully");
+        const index = this.epis.indexOf(epi);
+        if (index > -1) {
+          this.epis.splice(index, 1);
+          this.epiSource.data = this.epis;
+        }
+      }
+   });
+  }
 }

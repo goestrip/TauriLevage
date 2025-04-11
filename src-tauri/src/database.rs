@@ -41,8 +41,8 @@ pub fn init_db(connection: &Connection) -> Result<()> {
             anomaly_type_id INTEGER NOT NULL,
             description TEXT NOT NULL,
             criticity INTEGER NOT NULL,
-            date_detection TEXT NOT NULL,
-            date_resolution TEXT,
+            date_detection INTEGER NOT NULL,
+            date_resolution INTEGER,
             FOREIGN KEY(anomaly_type_id) REFERENCES anomaly_type(id)
         )",
         [],
@@ -276,7 +276,7 @@ pub fn get_anomaly_types(connection: &Option<Connection>) -> Result<Vec<crate::m
     Ok(anomaly_type_iter.collect::<Result<Vec<crate::model::AnomalyType>>>()?)
 }
 
-pub fn save_anomaly(connection: &Option<Connection>, anomaly: &model::Anomaly) -> Result<(i32)> {
+pub fn save_anomaly(connection: &Option<Connection>, anomaly: &model::Anomaly) -> Result<i32> {
     let connection = match connection {
         Some(conn) => conn,
         None => {
@@ -372,4 +372,18 @@ pub fn get_all_anomalies(connection: &Option<Connection>) -> Result<Vec<crate::m
     })?;
     
     Ok(anomaly_iter.collect::<Result<Vec<crate::model::Anomaly>>>()?)
+}
+
+pub fn delete_epi(connection: &Option<Connection>, id: i32) -> Result<()> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    connection.execute("DELETE FROM epi WHERE id = ?", [id])?;
+    Ok(())
 }

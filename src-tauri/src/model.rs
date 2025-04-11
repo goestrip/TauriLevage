@@ -13,28 +13,6 @@ impl Default for Criticity {
         Criticity::None
     }
 }
-impl Criticity {
-    pub fn to_int(&self) -> i32 {
-        match self {
-            Criticity::None => 0,
-            Criticity::Processed => 1,
-            Criticity::Low => 2,
-            Criticity::Medium => 3,
-            Criticity::High => 4,
-        }
-    }
-
-    pub fn from_int(value: i32) -> Self {
-        match value {
-            0 => Criticity::None,
-            1 => Criticity::Processed,
-            2 => Criticity::Low,
-            3 => Criticity::Medium,
-            4 => Criticity::High,
-            _ => Criticity::None, // Default case
-        }
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AnomalyType {

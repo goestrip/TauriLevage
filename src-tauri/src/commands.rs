@@ -156,3 +156,32 @@ pub fn get_anomalies(state: State<AppConfigData>) -> Result<String, String> {
     Ok(serde_json::to_string(&anomalies).unwrap())
 }
 
+#[tauri::command]
+pub fn delete_epi(state: State<AppConfigData>, id: String) -> Result<bool, String> {
+    log::info!("delete_epi {}", id);
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("Database connection is None");
+        return Err("Database connection is None".to_string());
+    }
+    let epi_id: i32 = match id.parse() {
+        Ok(id) => id,
+        Err(_) => {
+            log::error!("Invalid epi_id: {}", id);
+            return Err("Invalid epi_id".to_string());
+        }
+    };
+    let deleted = database::delete_epi(&connection, epi_id);
+    match deleted {
+        Ok(_) => {
+            log::info!("Epi deleted");
+            io::stdout().flush().expect("Unable to flush stdout");
+            Ok(true)
+        }
+        Err(e) =>{
+            log::error!("Error deleting epi: {}", e);
+            Ok(false)
+        } 
+    }
+
+}
