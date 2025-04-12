@@ -100,7 +100,7 @@ export class FormEpiComponent implements OnInit {
       nature: [data?.epi?.nature || '', Validators.required],
       fabricationDate: [data?.epi?.date_fabrication || ''],
       activationDate: [data?.epi?.date_mise_en_service || ''],
-      validiteYears: [data?.epi?.validite_years || 10, [Validators.min(0), Validators.max(100)]],
+      validiteYears: [data?.epi?.validite_years || '', [Validators.min(0), Validators.max(100)]],
       validiteLimite: [{ value: data?.epi?.validiteLimite || '', disabled: true }],
       assigned_to: this.peopleFormControl,
       emplacement: [data?.epi?.emplacement || ''],
@@ -125,8 +125,7 @@ export class FormEpiComponent implements OnInit {
     this.epiForm.get('fabricationDate')?.valueChanges.subscribe(() => this.calculateValidityLimit());
 
     this.epiForm.get('nature')?.valueChanges.subscribe((value) =>{
-        const serial = GenerateSerialNumber(value.nature);
-        this.epiForm.get('serialNumber')?.setValue(serial);
+        
       });
     // Preset activationDate to fabricationDate when editing activationDate
     this.epiForm.get('fabricationDate')?.valueChanges.subscribe((fabricationDate) => {
@@ -136,10 +135,6 @@ export class FormEpiComponent implements OnInit {
       }
     });
 
-    let serialControl = this.epiForm.get('serialNumber');
-    serialControl?.valueChanges.subscribe((serialNumber) => {
-      console.log(serialControl?.errors);
-  });
 
     this.peopleFormControl.setValue(this.data?.epi?.assigned_to || null); // Set the initial value for peopleFormControl
 
@@ -148,6 +143,13 @@ export class FormEpiComponent implements OnInit {
         startWith(''),
         map(value => this._filterPeople(value || '')),
       );
+  }
+
+  generateSerialNumber(){
+    const materiel = this.epiForm.get('nature')?.value;
+    if(!materiel) return; // If nature is not selected, do nothing
+    const serial = GenerateSerialNumber(materiel.nature); // Generate serial number based on nature
+    this.epiForm.get('serialNumber')?.setValue(serial);
   }
 
   private calculateValidityLimit(): void {

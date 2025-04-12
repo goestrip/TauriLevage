@@ -7,7 +7,24 @@ form {
     margin-left: 10px; // Added margin on the left
     margin-right: 10px; // Added margin on the right
     margin-bottom: 10px; // Added margin at the bottom
+    overflow: hidden;
 }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(100px, 1fr)); // Ensure each column has a minimum width of 200px
+    row-gap: 8px;
+    column-gap: 20px; // Space between columns
+    padding-top: 5px; // Added padding before the first row
+    overflow-y: scroll;
+}
+
+.fixed-buttons {
+  position: sticky;
+  bottom: 0;
+  padding: 10px;
+}
+
 
 .anomaly-header{
     display: flex;
@@ -20,20 +37,12 @@ h2 {
     text-align: center; // Center the title
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(100px, 1fr)); // Ensure each column has a minimum width of 200px
-    row-gap: 8px;
-    column-gap: 20px; // Space between columns
-    padding-top: 5px; // Added padding before the first row
-}
+
 
 mat-form-field {
     width: 100%;
 }
-table {
-    width: 100%; // Ensure the table itself is 100% wide
-  }
+
 
 .table-container {
     grid-column: span 3; // Make the table span two columns in the grid
@@ -41,19 +50,19 @@ table {
     margin-top: 2px; // Add spacing between the grid and the table
   }
 
-.red-icon {
-color: rgb(212, 25, 25); // Set the icon color to red
-}
-#delete-button{
+
+.delete-button{
+  flex : 1; // Make the delete button take equal space
     color:$color-critical;
+}
+.save-button{
+  flex: 2;
+  background-color: rgb(214, 250, 205)
 }
 
 .button-container {
   display: flex;
   gap: 1rem; /* Add spacing between buttons */
-  width: 100%; /* Make the container take the full width */
+  width: 98%; /* Make the container take the full width */
 }
 
-.full-width-button {
-  flex: 1; /* Make each button take equal space */
-}

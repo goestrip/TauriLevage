@@ -1,4 +1,5 @@
 <h2>{{ formTitle }}</h2>
+<div class="form-container">
 <form [formGroup]="epiForm" (ngSubmit)="onSubmit()">
   <div class="form-grid">
 
@@ -14,6 +15,9 @@
     <mat-form-field appearance="outline">
       <mat-label>Numéro de série</mat-label>
       <input matInput formControlName="serialNumber" />
+      <button mat-icon-button matSuffix type="button" (click)="generateSerialNumber()">
+        <mat-icon>add</mat-icon>
+      </button>
       <mat-error *ngIf="epiForm.get('serialNumber')?.hasError('required')">
         numéro nécessaire.
       </mat-error>
@@ -112,9 +116,9 @@
       <app-anomaly-table [(anomaly)]="anomaly"></app-anomaly-table>
     </div>
   </div>
-
-  <div class="button-container">
-    <button id="delete-button" mat-raised-button color="warn" type="button" (click)="onDelete()" class="full-width-button">Supprimer</button>
-    <button mat-raised-button color="primary" type="submit" [disabled]="!epiForm.valid" class="full-width-button">Enregistrer</button>
+  <div class="button-container fixed-buttons">
+    <button mat-raised-button color="warn" type="button" (click)="onDelete()" class="delete-button">Supprimer EPI</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!epiForm.valid" class="save-button">Enregistrer</button>
   </div>
 </form>
+</div>

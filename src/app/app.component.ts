@@ -59,6 +59,7 @@ export class AppComponent {
     let dialogRef = this.dialog.open(FormEpiComponent, {
       width: '900px',
       maxWidth: '90vw',
+      maxHeight: '90vh',
         data: { formTitle: 'Ajout EPI' } // Pass 'epi' as the form title
     });
 
