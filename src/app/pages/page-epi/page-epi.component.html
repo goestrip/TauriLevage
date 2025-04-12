@@ -33,16 +33,7 @@
   <ng-container matColumnDef="serial" >
     <th mat-header-cell *matHeaderCellDef>num Serie </th>
     <td mat-cell *matCellDef="let epi" [ngClass]="isRebus(epi)?'class-rebus' : ''"> 
-      
-      <ng-container *ngIf="editingRow === epi; else staticSerial">
-        <div class="input-container">
-            <input matInput [(ngModel)]="epi.serial">
-        </div>
-      </ng-container>
-      <ng-template #staticSerial>
         {{ epi.serial }}
-      </ng-template>
-      
     </td>
   </ng-container>
 
@@ -50,22 +41,8 @@
     <th mat-header-cell mat-sort-header *matHeaderCellDef> Nature
      </th>
     <td mat-cell *matCellDef="let epi">
-      <ng-container *ngIf="editingRow === epi; else staticNature">
-        <div class="input-container">
-          
-            <mat-label>Nature</mat-label>
-            <mat-select [(ngModel)]="epi.nature" name="nature">
-              @for (materiel of epiMateriel; track materiel) {
-                <mat-option [value]="materiel">{{materiel.nature}}</mat-option>
-              }
-            </mat-select>
-          
-        </div>
-      </ng-container>
-      <ng-template #staticNature>
         {{epi.nature.nature}}
-      </ng-template>
-      </td>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="date_fabrication">
@@ -78,35 +55,14 @@
   <ng-container matColumnDef="date_mise_en_service">
     <th mat-header-cell mat-sort-header *matHeaderCellDef> Mise en service</th>
     <td mat-cell *matCellDef="let epi"  >
-      <ng-container *ngIf="editingRow === epi; else staticSerial">
-        <div class="input-container">
-          <mat-form-field>
-            <input matInput [matDatepicker]="picker" [(ngModel)]="epi.date_mise_en_service" >
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </ng-container>
-      <ng-template #staticSerial>
         {{epi?.date_mise_en_service|  date:'dd-MM-yyyy' }}
-      </ng-template>
     </td>
   </ng-container>
 
   <ng-container matColumnDef="validite_years">
     <th mat-header-cell *matHeaderCellDef>Durée validité</th>
     <td mat-cell *matCellDef="let epi">
-         
-      <ng-container *ngIf="editingRow === epi; else staticSerial">
-        <div class="input-container">
-            <input matInput  type="number" [(ngModel)]="epi.validite_years" min="0" max="100" step="1">
-        </div>
-      </ng-container>
-      <ng-template #staticSerial>
         {{epi.validite_years}}
-      </ng-template>
-
-      
     </td>
   </ng-container>
 

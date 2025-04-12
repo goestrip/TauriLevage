@@ -33,26 +33,16 @@
       <mat-datepicker #activationPicker></mat-datepicker>
     </mat-form-field>
 
-
     <mat-form-field appearance="outline">
-      <mat-label>Date de fabrication</mat-label>
-      <input matInput [matDatepicker]="fabricationPicker" formControlName="fabricationDate" />
-      <mat-datepicker-toggle matSuffix [for]="fabricationPicker"></mat-datepicker-toggle>
-      <mat-datepicker #fabricationPicker></mat-datepicker>
-    </mat-form-field>
-
-
-    <mat-form-field appearance="outline">
-      <mat-label>Durée Validité (années)</mat-label>
-      <input matInput type="number" formControlName="validiteYears" min="0" max="100" step="1" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Valide Jusqu'au</mat-label>
-      <input matInput [matDatepicker]="validityPicker" formControlName="validiteLimite" />
-      <mat-datepicker-toggle matSuffix [for]="validityPicker"></mat-datepicker-toggle>
-      <mat-datepicker #validityPicker></mat-datepicker>
-    </mat-form-field>
+        <mat-label>Levage CMU (kg)</mat-label>
+        <input matInput type="number" formControlName="cmuKg" />
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline">
+        <mat-label>Levage Essai Charge</mat-label>
+        <input matInput type="number" formControlName="essaiCharge" />
+      </mat-form-field>
+  
 
     <mat-form-field appearance="outline">
       <mat-label>Assignation</mat-label>
@@ -87,12 +77,6 @@
       <mat-datepicker #controlPicker></mat-datepicker>
     </mat-form-field>
 
-    <div class="anomaly-header">
-      <!-- <h4>Anomalies</h4> -->
-      <button mat-raised-button color="accent" type="button"  (click)="addAnomaly()">Ajouter une anomalie</button>
-    </div>
-
-    <div></div>
 
     <mat-form-field appearance="outline">
       <mat-label>Date Rebus</mat-label>
@@ -101,6 +85,10 @@
       <mat-datepicker #rebusPicker></mat-datepicker>
     </mat-form-field>
 
+    
+    <div class="anomaly-header">
+        <button mat-raised-button color="accent" type="button"  (click)="addAnomaly()">Ajouter une anomalie</button>
+    </div>
     
     <div class="table-container" *ngIf="anomaly">  
       <app-anomaly-table [(anomaly)]="anomaly"></app-anomaly-table>

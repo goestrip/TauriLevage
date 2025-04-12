@@ -185,4 +185,20 @@ export class DataModelService {
       }
    });
   }
+
+  public deleteLevage(levage: Levage|null) {
+    if (!levage) return;
+    const levage_id = levage.id.toString();
+    
+    invoke<string>("delete_levage", {id: levage_id}).then((isDeleted) => {
+      if (isDeleted ) {
+        console.log("LEVAGE deleted successfully");
+        const index = this.levages.indexOf(levage);
+        if (index > -1) {
+          this.levages.splice(index, 1);
+          this.levageSource.data = this.levages;
+        }
+      }
+   });
+  }
 }

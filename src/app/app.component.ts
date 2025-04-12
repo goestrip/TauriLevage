@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatTabsModule} from '@angular/material/tabs';
 import { RouterModule } from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
+import { Router } from '@angular/router';
 
 import { invoke } from "@tauri-apps/api/core";
 
@@ -13,6 +14,7 @@ import { DataModelService } from './services/data-model.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsComponent } from './settings/settings.component';
 import { FormEpiComponent } from './forms/form-epi/form-epi.component';
+import { FormLevageComponent } from './forms/form-levage/form-levage.component';
 
 
 @Component({
@@ -36,7 +38,7 @@ export class AppComponent {
   today: Date = new Date();
   isDbLoaded = false;
 
-  constructor(private dataService:DataModelService) {
+  constructor(private dataService: DataModelService, private router: Router) {
 
     effect(() => {
       this.isDbLoaded = this.dataService.isDbLoaded();
@@ -56,18 +58,38 @@ export class AppComponent {
   }
 
   addLine(): void {
-    let dialogRef = this.dialog.open(FormEpiComponent, {
-      width: '900px',
-      maxWidth: '90vw',
-      maxHeight: '90vh',
-        data: { formTitle: 'Ajout EPI' } // Pass 'epi' as the form title
-    });
+    const currentRoute = this.router.url; // Get the current route
+    let dialogRef;
 
-    dialogRef.afterClosed().subscribe((updatedEpi) => {
-      console.log("dialog closed, updatedEpi", updatedEpi);
+    if (currentRoute.includes('page-epi')) {
+      console.log("open epi form");
       
-      if (updatedEpi) {
-        this.dataService.addEpi(updatedEpi);
+      dialogRef = this.dialog.open(FormEpiComponent, {
+        width: '900px',
+        maxWidth: '90vw',
+        maxHeight: '90vh',
+        data: { formTitle: 'Ajout EPI' }
+      });
+    } else if (currentRoute.includes('page-levage')) {
+      console.log("open levage form");
+      // Replace with the appropriate form component for 'page-levage'
+      dialogRef = this.dialog.open(FormLevageComponent, {
+        width: '900px',
+        maxWidth: '90vw',
+        maxHeight: '90vh',
+        data: { formTitle: 'Ajout Levage' }
+      });
+    } else {
+      // Handle other cases or default behavior
+      console.log('No specific form for this route.');
+      return;
+    }
+
+    dialogRef.afterClosed().subscribe((updatedData) => {
+      console.log("dialog closed, updatedData", updatedData);
+
+      if (updatedData) {
+        this.dataService.addEpi(updatedData); // Adjust this method if needed for other forms
       }
     });
   }

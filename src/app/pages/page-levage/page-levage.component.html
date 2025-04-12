@@ -33,16 +33,7 @@
     <ng-container matColumnDef="serial" >
       <th mat-header-cell *matHeaderCellDef>num Serie </th>
       <td mat-cell *matCellDef="let levage" [ngClass]="isRebus(levage)?'class-rebus' : ''"> 
-        
-        <ng-container *ngIf="editingRow === levage; else staticSerial">
-          <div class="input-container">
-              <input matInput [(ngModel)]="levage.serial">
-          </div>
-        </ng-container>
-        <ng-template #staticSerial>
           {{ levage.serial }}
-        </ng-template>
-        
       </td>
     </ng-container>
   
@@ -50,50 +41,25 @@
       <th mat-header-cell mat-sort-header *matHeaderCellDef> Nature
        </th>
       <td mat-cell *matCellDef="let levage">
-        <ng-container *ngIf="editingRow === levage; else staticNature">
-          <div class="input-container">
-            
-              <mat-label>Nature</mat-label>
-              <mat-select [(ngModel)]="levage.nature" name="nature">
-                @for (materiel of levageMateriel; track materiel) {
-                  <mat-option [value]="materiel">{{materiel.nature}}</mat-option>
-                }
-              </mat-select>
-            
-          </div>
-        </ng-container>
-        <ng-template #staticNature>
           {{levage.nature.nature}}
-        </ng-template>
-        </td>
+      </td>
     </ng-container>
   
     <ng-container matColumnDef="date_mise_en_service">
       <th mat-header-cell mat-sort-header *matHeaderCellDef> Mise en service</th>
       <td mat-cell *matCellDef="let levage"  >
-        <ng-container *ngIf="editingRow === levage; else staticSerial">
-          <div class="input-container">
-            <mat-form-field>
-              <input matInput [matDatepicker]="picker" [(ngModel)]="levage.date_mise_en_service" >
-              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-          </div>
-        </ng-container>
-        <ng-template #staticSerial>
           {{levage?.date_mise_en_service|  date:'dd-MM-yyyy' }}
-        </ng-template>
       </td>
     </ng-container>
   
     
     <ng-container matColumnDef="cmu_kg">
-        <th mat-header-cell mat-sort-header *matHeaderCellDef>Assignation</th>
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>CMU (kg)</th>
         <td mat-cell *matCellDef="let levage"> {{levage.cmu_kg}} </td>
       </ng-container>
 
     <ng-container matColumnDef="essai_charge">
-        <th mat-header-cell mat-sort-header *matHeaderCellDef>Assignation</th>
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>Essqi charge (kg)</th>
         <td mat-cell *matCellDef="let levage"> {{levage.assigned_to?.prenom}} {{levage.assigned_to?.nom}}</td>
       </ng-container>
       
