@@ -2,12 +2,13 @@ import { Injectable, Signal, signal } from '@angular/core';
 import { Epi } from '../model/epi';
 import { MatTableDataSource } from '@angular/material/table';
 import { invoke } from "@tauri-apps/api/core";
-import { EpiMateriel } from '../model/catalogMateriel';
+import { EpiMateriel, LevageMateriel } from '../model/catalogMateriel';
 import { EpiCsvDto, EpiDto } from '../model/dto/epiDto';
 import { People } from '../model/people';
 import { Emplacement } from '../model/emplacement';
 import { AnomalyType, Anomaly } from '../model/anomaly';
 import { AnomalyDto } from '../model/dto/anomalyDto';
+import { Levage } from '../model/levage';
 
 @Injectable({
   providedIn: 'root'
@@ -15,12 +16,18 @@ import { AnomalyDto } from '../model/dto/anomalyDto';
 export class DataModelService {
 
   private epis : Epi[] = [];
+  public epiSource = new MatTableDataSource(this.epis);
   public materiels  = signal([] as EpiMateriel[]);
+
+
+  private levages: Levage[] = [];
+  public levageSource = new MatTableDataSource(this.levages);
+  public levageMateriels  = signal([] as LevageMateriel[]);
+
   public employees = signal([] as People[]);
   public locations = signal([] as Emplacement[]);
   public anomalyTypes = signal([] as AnomalyType[]);
   public isDbLoaded = signal(false);
-  public epiSource = new MatTableDataSource(this.epis);
 
   constructor() {
     this.materiels.set([

@@ -43,8 +43,8 @@ export class PageEpiComponent {
 
    displayedColumns: string[] = [
      'edition',
-     'serial',
      'nature',
+     'serial',
      'date_fabrication',
      'date_mise_en_service',
      'validite_years',

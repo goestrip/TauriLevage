@@ -3,27 +3,10 @@ import { Emplacement } from "./emplacement";
 import { EpiMateriel } from "./catalogMateriel";
 import { People } from "./people";
 import { v4 as uuidv4 } from 'uuid';
+import { YEAR_TO_MS } from "./helpers";
+import { ControlDates } from "./controlDates";
  
-function getRandomDate(start: Date, end:Date|null = null): Date {
-if(end === null){
-    end = new Date();
-}
-    const startTime = start.getTime();
-    const endTime = end.getTime();
-    const randomTime = new Date(startTime + Math.random() * (endTime - startTime));
-    return randomTime;
-}
 
-const YEAR_TO_MS = 365 * 24 *3600 * 1000;
-
-export class ControlDates{
-    public warningDate: Date ;
-    public overdueDate: Date ;
-    constructor(warningDate: Date , overdueDate: Date){ 
-        this.warningDate = warningDate;
-        this.overdueDate = overdueDate;
-    }
-}
 
 export class Epi{
     public id: number = 0;

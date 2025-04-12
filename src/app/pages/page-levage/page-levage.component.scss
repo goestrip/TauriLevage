@@ -1,0 +1,79 @@
+@use '@angular/material' as mat;
+@use  'colors' as *;
+
+:host {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.cell-red {
+    background-color: $color-critical;
+    color: $color-criticalt-text;
+}
+
+.table-container {
+    max-height: 400px; /* Adjust the height as needed */
+    overflow: hidden;
+}
+
+.mat-header-row {
+    background: white; /* Ensure the header row has a background color */
+    z-index: 1; /* Ensure the header row is above other rows */
+}
+
+.class-normal {
+    background-color: $color-normal;
+}
+
+.class-row-rebus {
+    color: $color-criticalt-text;
+    background-color: $color-critical;
+}
+
+.class-urgent {
+    background-color: $color-urgent;
+}
+
+.class-critical {
+    background-color: $color-critical;
+    color: $color-criticalt-text;
+}
+
+.class-processed {
+    background-color: $color-processed;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-field {
+    flex: 0.5;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mat-mdc-form-field {
+    font-size: 14px;
+    width: 25%;
+    padding: 5px;
+}
+
+.filter-container {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-right: 1em;
+}
+
+#searchFilter {
+    min-width: 160px;
+}
+
+.filter-container button {
+    margin-left: 10px;
+}

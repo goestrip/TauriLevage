@@ -8,3 +8,6 @@ export function GenerateSerialNumber(materielType: string):string{
     const paddedNum = String(randomNum).padStart(6, '0'); // Pad the number with leading zeros to ensure it's 6 digits
     return `${prefix}-${paddedNum}`; // Return the formatted serial number
 }
+
+    
+export const YEAR_TO_MS = 365 * 24 *3600 * 1000;

@@ -1,1 +1,134 @@
-<p>page-levage works!</p>
+<div class="filter-container">
+    <mat-form-field id="searchFilter" floatLabel="always">
+      <mat-label>Filter</mat-label>
+      <input matInput (keyup)="applyFilter($event)" [(ngModel)]="filter" placeholder="Rechercher" #input>
+      @if (filter) {
+        <button matSuffix mat-icon-button aria-label="Clear" (click)="clearFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+    
+    <div class="spacer"></div> <!-- Add a spacer to push the button to the end -->
+    
+    <div class="import-container">
+      <button mat-raised-button color="primary" (click)="fileInput.click()">
+        Import CSV
+      </button>
+      <input type="file" #fileInput accept=".csv" style="display: none;" (change)="handleFileInput($event)">
+    </div>
+  </div>
+  
+  <table mat-table matSort  [dataSource]="levageData" (matSortChange)="announceSortChange($event)">
+    
+    <ng-container matColumnDef="edition" [sticky]="true">
+      <th mat-header-cell *matHeaderCellDef>Edition</th>
+      <td mat-cell *matCellDef="let levage">
+        <button mat-icon-button (click)="toggleEditRow(levage)">
+          <mat-icon>{{ editingRow === levage ? 'save' : 'edit' }}</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    
+    <ng-container matColumnDef="serial" >
+      <th mat-header-cell *matHeaderCellDef>num Serie </th>
+      <td mat-cell *matCellDef="let levage" [ngClass]="isRebus(levage)?'class-rebus' : ''"> 
+        
+        <ng-container *ngIf="editingRow === levage; else staticSerial">
+          <div class="input-container">
+              <input matInput [(ngModel)]="levage.serial">
+          </div>
+        </ng-container>
+        <ng-template #staticSerial>
+          {{ levage.serial }}
+        </ng-template>
+        
+      </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="nature">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef> Nature
+       </th>
+      <td mat-cell *matCellDef="let levage">
+        <ng-container *ngIf="editingRow === levage; else staticNature">
+          <div class="input-container">
+            
+              <mat-label>Nature</mat-label>
+              <mat-select [(ngModel)]="levage.nature" name="nature">
+                @for (materiel of levageMateriel; track materiel) {
+                  <mat-option [value]="materiel">{{materiel.nature}}</mat-option>
+                }
+              </mat-select>
+            
+          </div>
+        </ng-container>
+        <ng-template #staticNature>
+          {{levage.nature.nature}}
+        </ng-template>
+        </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="date_mise_en_service">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef> Mise en service</th>
+      <td mat-cell *matCellDef="let levage"  >
+        <ng-container *ngIf="editingRow === levage; else staticSerial">
+          <div class="input-container">
+            <mat-form-field>
+              <input matInput [matDatepicker]="picker" [(ngModel)]="levage.date_mise_en_service" >
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </ng-container>
+        <ng-template #staticSerial>
+          {{levage?.date_mise_en_service|  date:'dd-MM-yyyy' }}
+        </ng-template>
+      </td>
+    </ng-container>
+  
+    
+    <ng-container matColumnDef="cmu_kg">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>Assignation</th>
+        <td mat-cell *matCellDef="let levage"> {{levage.cmu_kg}} </td>
+      </ng-container>
+
+    <ng-container matColumnDef="essai_charge">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>Assignation</th>
+        <td mat-cell *matCellDef="let levage"> {{levage.assigned_to?.prenom}} {{levage.assigned_to?.nom}}</td>
+      </ng-container>
+      
+
+  
+    <ng-container matColumnDef="assigned_to">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Assignation</th>
+      <td mat-cell *matCellDef="let levage"> {{levage.assigned_to?.prenom}} {{levage.assigned_to?.nom}}</td>
+    </ng-container>
+    
+    <ng-container matColumnDef="emplacement">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Emplacement</th>
+      <td mat-cell *matCellDef="let levage"> {{levage.emplacement?.location}} </td>
+    </ng-container>
+    
+    <ng-container matColumnDef="date_last_control">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Date controle</th>
+      <td mat-cell *matCellDef="let levage" [ngClass]="getControlClass(levage)"> {{levage?.date_last_control|  date:'dd-MM-yyyy'}} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="date_rebus">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Date rebus</th>
+      <td mat-cell *matCellDef="let levage"  [ngClass]="isRebus(levage)?'class-rebus' : ''"> {{levage?.date_rebus|  date:'dd-MM-yyyy'}} </td>
+    </ng-container>
+  
+    <ng-container matColumnDef="anomaly_name">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>anomalie</th>
+      <td mat-cell *matCellDef="let levage"> {{levage.anomaly?.anomaly_type?.name}} </td>
+    </ng-container>
+    <ng-container matColumnDef="anomaly_criticity">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Criticité</th>
+      <td mat-cell *matCellDef="let levage" [ngClass]="getCriticityClass(levage)"> {{levage.anomaly?.criticity}} </td>
+    </ng-container>
+  
+  
+    <tr mat-header-row  *matHeaderRowDef="displayedColumns; sticky:true  "></tr>
+    <tr mat-row *matRowDef="let levage; columns: displayedColumns"  [ngClass]="isRebus(levage)?'class-row-rebus' : ''"></tr>
+  </table>
