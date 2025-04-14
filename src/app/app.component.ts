@@ -15,6 +15,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { SettingsComponent } from './settings/settings.component';
 import { FormEpiComponent } from './forms/form-epi/form-epi.component';
 import { FormLevageComponent } from './forms/form-levage/form-levage.component';
+import { Levage } from './model/levage';
+import { Epi } from './model/epi';
 
 
 @Component({
@@ -63,13 +65,19 @@ export class AppComponent {
 
     if (currentRoute.includes('page-epi')) {
       console.log("open epi form");
-      
       dialogRef = this.dialog.open(FormEpiComponent, {
         width: '900px',
         maxWidth: '90vw',
         maxHeight: '90vh',
         data: { formTitle: 'Ajout EPI' }
       });
+      
+      dialogRef.afterClosed().subscribe((updatedData:Epi|null) => {
+        if (updatedData) {
+          this.dataService.addEpi(updatedData); // Adjust this method if needed for other forms
+        }
+      });
+      
     } else if (currentRoute.includes('page-levage')) {
       console.log("open levage form");
       // Replace with the appropriate form component for 'page-levage'
@@ -79,19 +87,18 @@ export class AppComponent {
         maxHeight: '90vh',
         data: { formTitle: 'Ajout Levage' }
       });
+      dialogRef.afterClosed().subscribe((updatedData:Levage|null) => {
+        if (updatedData) {
+          this.dataService.addLevage(updatedData); // Adjust this method if needed for other forms
+        }
+      });
+
     } else {
       // Handle other cases or default behavior
       console.log('No specific form for this route.');
       return;
     }
 
-    dialogRef.afterClosed().subscribe((updatedData) => {
-      console.log("dialog closed, updatedData", updatedData);
-
-      if (updatedData) {
-        this.dataService.addEpi(updatedData); // Adjust this method if needed for other forms
-      }
-    });
   }
   
   openSettings(): void {

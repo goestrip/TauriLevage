@@ -14,7 +14,7 @@ export class Epi{
     public serial: string = uuidv4().toString().slice(0, 8);
     public date_fabrication: Date | undefined ;
     public date_mise_en_service: Date | undefined;
-    public validite_years: number = 10;
+    public validite_years: number |null = null;
     public get validiteLimite(): Date | undefined{
         if(this.date_fabrication){
             return Epi.ComputeValiditeLimite( this.date_fabrication, this.validite_years);
@@ -40,8 +40,8 @@ export class Epi{
         else return null;
     }
 
-    public static ComputeValiditeLimite(date_fabrication: Date | undefined, validite_years: number): Date | undefined {
-        if(date_fabrication){
+    public static ComputeValiditeLimite(date_fabrication: Date | undefined, validite_years: number|null): Date | undefined {
+        if(date_fabrication && validite_years){
             return new Date(date_fabrication.getTime() + validite_years * YEAR_TO_MS);
         }
         return undefined;

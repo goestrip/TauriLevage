@@ -66,6 +66,10 @@ export class SettingsComponent {
     });
   }
 
+  initDb():void{
+    this.dataModelService.initDatabase();
+  }
+
   applySettings(): void {
     if(this.selectedFileName) {
       

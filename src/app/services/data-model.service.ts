@@ -9,6 +9,7 @@ import { Emplacement } from '../model/emplacement';
 import { AnomalyType, Anomaly } from '../model/anomaly';
 import { AnomalyDto } from '../model/dto/anomalyDto';
 import { Levage } from '../model/levage';
+import { LevageDto } from '../model/dto/levageDto';
 
 @Injectable({
   providedIn: 'root'
@@ -44,8 +45,14 @@ export class DataModelService {
 
    }
 
-   public async loadDatabase(){
+   public initDatabase() {
+    console.log("initDatabase");
+    invoke<string>("init_database", {}).then((text) => {
+      console.log(text);
+    });}
 
+
+   public async loadDatabase(){
     await(async () => {
       console.log("loadDatabase");
       invoke<string>("init_database", {}).then((text) => {
@@ -57,6 +64,7 @@ export class DataModelService {
         this.materiels.set(materiels);
         console.log(materiels);
       });
+
 
       invoke<string>("get_anomaly_types", {}).then((json) => {
         const anomalyTypes: AnomalyType[] = JSON.parse(json);
@@ -109,6 +117,26 @@ export class DataModelService {
     }
    }
 
+
+   public async loadLevages(){
+    console.log("loadLevages");
+    
+    await invoke<string>("get_levage_materiel", {}).then((json) => {
+      const materiels: LevageMateriel[] = JSON.parse(json);
+      this.levageMateriels.set(materiels);
+      console.log(materiels);
+    });
+
+    await invoke<string>("get_levage", {}).then((json) => {
+      const levageDtos: LevageDto[] = JSON.parse(json);
+      this.levages = levageDtos.map((levageDto) => {
+        return LevageDto.ToLevage(levageDto, this.levageMateriels(), this.employees(), this.locations(), []);
+      });
+      this.levageSource.data = this.levages;
+      console.log("loaded levages from back",this.levages);
+    });
+   }
+
    public addEpi(newEpi?: Epi) {
     if (!newEpi) return;
     this.epis.unshift(newEpi);
@@ -116,11 +144,18 @@ export class DataModelService {
     this.saveEpi(newEpi);
    }
 
+
+    public addLevage(newLevage?: Levage) {
+      if (!newLevage) return;
+      this.levages.unshift(newLevage);
+      this.levageSource.data = this.levages;
+      this.saveLevage(newLevage);
+    }
+
    public async saveEpi(epi: Epi){  
     if(epi.anomaly != null) {
        const anomalyJson = JSON.stringify(AnomalyDto.FromAnomaly(epi.anomaly));
        
-       console.log("sending anomaly to the back", anomalyJson);
        await invoke<string>("save_anomaly", {anomaly: anomalyJson}).then((anomalyId) => {
          console.log("anomaly saved, id = ",anomalyId);
          epi.anomaly!.id = parseInt(anomalyId);
@@ -134,6 +169,20 @@ export class DataModelService {
     });
    }
 
+   public async saveLevage(levage: Levage){
+    if(levage.anomaly != null) {
+      const anomalyJson = JSON.stringify(AnomalyDto.FromAnomaly(levage.anomaly));
+      
+      await invoke<string>("save_anomaly", {anomaly: anomalyJson}).then((anomalyId) => {
+        levage.anomaly!.id = parseInt(anomalyId);
+       });
+    }
+    const levageJson = JSON.stringify(LevageDto.FromLevage(levage));
+    console.log("sending levage to the back", levageJson);
+    invoke<string>("save_levage", {levage: levageJson}).then((text) => {
+      console.log("received from rust",text);
+    });
+  }
 
    public epiSerialExists(serial: string): boolean {
     return this.epis.some((epi) => epi.serial === serial);

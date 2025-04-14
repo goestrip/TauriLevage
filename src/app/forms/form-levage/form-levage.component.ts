@@ -1,6 +1,6 @@
 import { Component, Input, Inject, effect, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup,FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { EpiMateriel } from '../../model/catalogMateriel';
+import { EpiMateriel, LevageMateriel } from '../../model/catalogMateriel';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -53,7 +53,7 @@ export class FormLevageComponent implements OnInit {
   formLevage: Levage|null = null; // EPI form data
   anomaly : Anomaly|null = null; // Anomaly data
 
-  epiMaterielList: EpiMateriel[] = [];
+  levageMaterielList: LevageMateriel[] = [];
   peopleList: People[] = [];
   peopleFormControl = new FormControl();
   filteredPeople!: Observable<any[]>; // Filtered list for people
@@ -98,7 +98,7 @@ export class FormLevageComponent implements OnInit {
     });
 
     effect(() => {
-      this.epiMaterielList = this.dataService.materiels();
+      this.levageMaterielList = this.dataService.levageMateriels();
     });
     effect(() => {
       this.peopleList = this.dataService.employees();
@@ -158,14 +158,13 @@ export class FormLevageComponent implements OnInit {
 
   onSubmit() {
     if (this.epiForm.valid) {
-      const updatedEpi = {
+      const updatedLevage = {
         ...this.data.levage,
         serial: this.epiForm.get('serialNumber')?.value,
         nature: this.epiForm.get('nature')?.value,
-        date_fabrication: this.epiForm.get('fabricationDate')?.value ? new Date(this.epiForm.get('fabricationDate')?.value) : null,
         date_mise_en_service: this.epiForm.get('activationDate')?.value ? new Date(this.epiForm.get('activationDate')?.value) : null,
-        validite_years: this.epiForm.get('validiteYears')?.value,
-        validiteLimite: this.epiForm.get('validiteLimite')?.value ? new Date(this.epiForm.get('validiteLimite')?.value) : null,
+        cmu_kg: this.epiForm.get('cmuKg')?.value,
+        essai_charge: this.epiForm.get('essaiCharge')?.value,
         assigned_to: this.epiForm.get('assigned_to')?.value,
         emplacement: this.epiForm.get('emplacement')?.value,
         date_last_control: this.epiForm.get('dateLastControl')?.value ? new Date(this.epiForm.get('dateLastControl')?.value) : null,
@@ -173,7 +172,7 @@ export class FormLevageComponent implements OnInit {
         anomaly: this.anomaly
       };
 
-      this.dialogRef.close(updatedEpi); // Return the updated EPI to the parent component
+      this.dialogRef.close(updatedLevage); // Return the updated EPI to the parent component
     }
   }
 }

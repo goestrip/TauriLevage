@@ -20,6 +20,7 @@ import { Criticity } from '../../model/criticity';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { EpiMateriel, LevageMateriel } from '../../model/catalogMateriel';
 import { Levage } from '../../model/levage';
+import { FormLevageComponent } from '../../forms/form-levage/form-levage.component';
 
 
 
@@ -75,8 +76,15 @@ export class PageLevageComponent {
 
     effect(() => {
       this.levageMateriel = this.dataService.levageMateriels();
-
+      console.log("levageMateriel received", this.levageMateriel);
+      
     });
+  }
+
+  ngOnInit(): void {
+    console.log("ngOnInit levageData", this.levageData);
+    
+    this.dataService.loadLevages(); // Load levages when the component initializes
   }
 
   
@@ -86,24 +94,24 @@ export class PageLevageComponent {
 
   
 
-  toggleEditRow(epi: Epi): void {
-    const dialogRef = this.dialog.open(FormEpiComponent, {
+  toggleEditRow(levage: Levage): void {
+    const dialogRef = this.dialog.open(FormLevageComponent, {
       width: '900px',
       maxWidth: '90vw',
-      data: { formTitle: 'Edition EPI', epi: epi } // Pass the EPI to the dialog
+      data: { formTitle: 'Edition Levage', levage: levage } // Pass the EPI to the dialog
     });
 
 
-    dialogRef.afterClosed().subscribe((updatedEpi: Epi) => {
-      if (updatedEpi) {
-        (epi as Epi).copyFrom(updatedEpi); // Update the EPI with the changes
-        this.saveRow(epi); // Save the updated EPI
+    dialogRef.afterClosed().subscribe((updatedLevage: Levage) => {
+      if (updatedLevage) {
+        levage.copyFrom(updatedLevage); // Update the EPI with the changes
+        this.saveRow(levage); // Save the updated EPI
       }
     });
   }
 
-  saveRow(epi: any): void {
-    this.dataService.saveEpi(epi); // Save the EPI to the data service
+  saveRow(levage: Levage): void {
+    this.dataService.saveLevage(levage); // Save the EPI to the data service
   }
 
   getValidityClass(epi: Epi): string {

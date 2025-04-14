@@ -1,6 +1,6 @@
 import { Anomaly } from "./anomaly";
 import { Emplacement } from "./emplacement";
-import { EpiMateriel } from "./catalogMateriel";
+import { EpiMateriel, LevageMateriel } from "./catalogMateriel";
 import { People } from "./people";
 import { v4 as uuidv4 } from 'uuid';
 import { YEAR_TO_MS } from "./helpers";
@@ -10,11 +10,11 @@ import { ControlDates } from "./controlDates";
 
 export class Levage{
     public id: number = 0;
-    public nature: EpiMateriel | null = null;
+    public nature: LevageMateriel | null = null;
     public serial: string = uuidv4().toString().slice(0, 8);
     public date_mise_en_service: Date | undefined;
     public cmu_kg: number = 0;
-    public essai_charge: number = 0;
+    public essai_charge: number|null = null;
     
     public assigned_to: People|null = null;
     public emplacement: Emplacement|null = null;

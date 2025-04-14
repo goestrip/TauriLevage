@@ -56,6 +56,15 @@ pub fn init_db(connection: &Connection) -> Result<()> {
         )",
         [],
     )?;
+
+    // Create table for levqge_materiel
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS levage_materiel (
+            id INTEGER PRIMARY KEY,
+            nature TEXT NOT NULL            
+        )",
+        [],
+    )?;
     
     // Create table for epi
     connection.execute(
@@ -73,6 +82,30 @@ pub fn init_db(connection: &Connection) -> Result<()> {
             anomaly_id INTEGER,
             FOREIGN KEY(anomaly_id) REFERENCES anomalies(id),
             FOREIGN KEY(nature_id) REFERENCES epi_materiel(id),
+            FOREIGN KEY(assigned_to_id) REFERENCES people(id),
+            FOREIGN KEY(emplacement_id) REFERENCES emplacement(id)
+        );
+        CREATE UNIQUE INDEX idx_serial ON epi (serial);
+        ",
+        [],
+    )?;
+
+    connection.execute(
+        "CREATE TABLE IF NOT EXISTS levage (
+            id INTEGER PRIMARY KEY,
+            nature_id INTEGER NOT NULL,
+            serial TEXT NOT NULL,
+            date_mise_en_service INTEGER NULL,
+            cmu_kg INTEGER NULL,
+            longueur_m FLOAT NULL,
+            essai_charge_kg INTEGER NULL,
+            assigned_to_id INTEGER,
+            emplacement_id INTEGER,
+            date_last_control INTEGER,
+            date_rebus INTEGER,
+            anomaly_id INTEGER,
+            FOREIGN KEY(anomaly_id) REFERENCES anomalies(id),
+            FOREIGN KEY(nature_id) REFERENCES levage_materiel(id),
             FOREIGN KEY(assigned_to_id) REFERENCES people(id),
             FOREIGN KEY(emplacement_id) REFERENCES emplacement(id)
         );
@@ -102,6 +135,28 @@ pub fn get_all_epi_materiel(connection: &Option<Connection>) -> Result<Vec<EpiMa
         })
     })?;
     Ok(epi_materiel_iter.collect::<Result<Vec<EpiMateriel>>>()?)
+}
+
+pub fn get_all_levage_materiel(
+    connection: &Option<Connection>,
+) -> Result<Vec<crate::model::LevageMateriel>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT id, nature FROM levage_materiel")?;
+    let levage_materiel_iter = stmt.query_map([], |row| {
+        Ok(crate::model::LevageMateriel {
+            id: row.get(0)?,
+            nature: row.get(1)?,
+        })
+    })?;
+    Ok(levage_materiel_iter.collect::<Result<Vec<crate::model::LevageMateriel>>>()?)
 }
 
 pub fn get_all_people(connection: &Option<Connection>) -> Result<Vec<People>> {
@@ -385,5 +440,136 @@ pub fn delete_epi(connection: &Option<Connection>, id: i32) -> Result<()> {
     };
 
     connection.execute("DELETE FROM epi WHERE id = ?", [id])?;
+    Ok(())
+}
+
+pub fn delete_levage(connection: &Option<Connection>, id: i32) -> Result<()> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    connection.execute("DELETE FROM levage WHERE id = ?", [id])?;
+    Ok(())
+}
+
+pub fn get_all_levage(connection: &Option<Connection>) -> Result<Vec<crate::model::Levage>> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+
+    let mut stmt = connection.prepare("SELECT * FROM levage")?;
+    let levage_iter = stmt.query_map([], |row| {
+        Ok(crate::model::Levage {
+            id: Some(row.get(0)?),
+            nature_id: row.get(1)?,
+            serial: row.get(2)?,
+            date_mise_en_service: row.get(3)?,
+            cmu_kg: row.get(4)?,
+            longueur_m: row.get(5)?,
+            essai_charge_kg: row.get(6)?,
+            assigned_to_id: row.get(7)?,
+            emplacement_id: row.get(8)?,
+            date_last_control: row.get(9)?,
+            date_rebus: row.get(10)?,
+            anomaly_id: row.get(11)?,
+        })
+    })?;
+    Ok(levage_iter.collect::<Result<Vec<crate::model::Levage>>>()?)
+}
+
+
+pub fn save_levage(connection: &Option<Connection>, levage: &crate::model::Levage) -> Result<()> {
+    let connection = match connection {
+        Some(conn) => conn,
+        None => {
+            return Err(rusqlite::Error::InvalidParameterName(
+                "No database connection".to_string(),
+            ))
+        }
+    };
+    if let Some(id) = levage.id {
+        // Update existing record
+        connection.execute(
+            "UPDATE levage SET 
+                nature_id = :nature_id, 
+                serial = :serial, 
+                date_mise_en_service = :date_mise_en_service,
+                cmu_kg = :cmu_kg,
+                longueur_m = :longueur_m,
+                essai_charge_kg = :essai_charge_kg,
+                assigned_to_id = :assigned_to_id,
+                emplacement_id = :emplacement_id,
+                date_last_control = :date_last_control,
+                date_rebus = :date_rebus,
+                anomaly_id = :anomaly_id
+             WHERE id = :id",
+            named_params! {
+                ":id": id,
+                ":nature_id": levage.nature_id,
+                ":serial": levage.serial,
+                ":date_mise_en_service": levage.date_mise_en_service,
+                ":cmu_kg": levage.cmu_kg,
+                ":longueur_m": levage.longueur_m,
+                ":essai_charge_kg": levage.essai_charge_kg,
+                ":assigned_to_id": levage.assigned_to_id,
+                ":emplacement_id": levage.emplacement_id,
+                ":date_last_control": levage.date_last_control,
+                ":date_rebus": levage.date_rebus,
+                ":anomaly_id": levage.anomaly_id
+            },
+        )?;
+    } else {
+        // Insert new record
+        connection.execute(
+            "INSERT INTO levage (
+                nature_id, 
+                serial, 
+                date_mise_en_service, 
+                cmu_kg, 
+                longueur_m, 
+                essai_charge_kg, 
+                assigned_to_id ,
+                date_last_control, 
+                emplacement_id, 
+                date_rebus,
+                anomaly_id
+            ) VALUES (
+                :nature_id, 
+                :serial, 
+                :date_mise_en_service, 
+                :cmu_kg, 
+                :longueur_m,
+                :essai_charge_kg,
+                :assigned_to_id,
+                :date_last_control,
+                :emplacement_id,
+                :date_rebus,
+                :anomaly_id
+            )", 
+            named_params! {
+                ":nature_id": levage.nature_id,
+                ":serial": levage.serial,
+                ":date_mise_en_service": levage.date_mise_en_service,
+                ":cmu_kg": levage.cmu_kg,
+                ":longueur_m": levage.longueur_m,
+                ":essai_charge_kg": levage.essai_charge_kg,
+                ":assigned_to_id": levage.assigned_to_id,
+                ":emplacement_id": levage.emplacement_id,
+                ":date_last_control": levage.date_last_control,
+                ":date_rebus": levage.date_rebus,
+                ":anomaly_id": levage.anomaly_id
+            },
+        )?;
+    }
     Ok(())
 }

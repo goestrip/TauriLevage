@@ -6,7 +6,7 @@
     <mat-form-field appearance="outline">
       <mat-label>Nature</mat-label>
       <mat-select formControlName="nature">
-        <mat-option *ngFor="let item of epiMaterielList" [value]="item">
+        <mat-option *ngFor="let item of levageMaterielList" [value]="item">
           {{ item.nature }}
         </mat-option>
       </mat-select>
@@ -95,7 +95,7 @@
     </div>
   </div>
   <div class="button-container fixed-buttons">
-    <button mat-raised-button color="warn" type="button" (click)="onDelete()" class="delete-button">Supprimer EPI</button>
+    <button mat-raised-button color="warn" type="button" (click)="onDelete()" class="delete-button">Supprimer materiel</button>
     <button mat-raised-button color="primary" type="submit" [disabled]="!epiForm.valid" class="save-button">Enregistrer</button>
   </div>
 </form>

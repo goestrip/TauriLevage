@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 use tauri::State;
 
-use crate::{database, model::Epi, model::Anomaly, state::AppConfigData};
+use crate::{database, model::{Anomaly, Epi, Levage}, state::AppConfigData};
 
 #[tauri::command]
 pub fn has_database(state: State<AppConfigData>) -> Result<bool, String> {
@@ -180,6 +180,83 @@ pub fn delete_epi(state: State<AppConfigData>, id: String) -> Result<bool, Strin
         }
         Err(e) =>{
             log::error!("Error deleting epi: {}", e);
+            Ok(false)
+        } 
+    }
+
+}
+
+#[tauri::command]
+pub fn save_levage(state: State<AppConfigData>, levage: String) -> String {
+    log::info!("save_levage {}", levage);
+    let levage_parsed: Levage = serde_json::from_str(&levage).unwrap();
+
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        eprintln!("Database connection is None");
+        return "Database connection is None".to_string();
+    }
+    let saved = database::save_levage(&connection, &levage_parsed);
+    match saved {
+        Ok(_) => {
+            println!("Levage saved");
+            io::stdout().flush().expect("Unable to flush stdout");
+        }
+        Err(e) => eprintln!("Error saving levage: {}", e),
+    }
+
+    serde_json::to_string(&levage_parsed).unwrap()
+}
+
+#[tauri::command]
+pub fn get_levage_materiel(state: State<AppConfigData>) -> Result<String, String> {
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        return Err("No Database connection ".to_string());
+    }
+
+    let levage_materiel = database::get_all_levage_materiel(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&levage_materiel).unwrap())
+}
+
+#[tauri::command]
+pub fn get_levage(state: State<AppConfigData>) -> Result<String, String> {
+    log::info!("get_levage");
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("No Database connection in state");
+        return Err("No Database connection ".to_string());
+    }
+    let levage = database::get_all_levage(&connection).map_err(|e| e.to_string())?;
+
+    Ok(serde_json::to_string(&levage).unwrap())
+}
+
+#[tauri::command]
+pub fn delete_levage(state: State<AppConfigData>, id: String) -> Result<bool, String> {
+    log::info!("delete_levage {}", id);
+    let connection = state.connection.lock().unwrap();
+    if connection.is_none() {
+        log::error!("Database connection is None");
+        return Err("Database connection is None".to_string());
+    }
+    let levage_id: i32 = match id.parse() {
+        Ok(id) => id,
+        Err(_) => {
+            log::error!("Invalid levage_id: {}", id);
+            return Err("Invalid levage_id".to_string());
+        }
+    };
+    let deleted = database::delete_levage(&connection, levage_id);
+    match deleted {
+        Ok(_) => {
+            log::info!("Levage deleted");
+            io::stdout().flush().expect("Unable to flush stdout");
+            Ok(true)
+        }
+        Err(e) =>{
+            log::error!("Error deleting levage: {}", e);
             Ok(false)
         } 
     }

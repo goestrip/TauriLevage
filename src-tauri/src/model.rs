@@ -69,3 +69,26 @@ pub struct Epi {
     pub date_rebus: Option<i64>,
     pub anomaly_id: Option<i32>,
 }
+
+// Define the LevageMateriel struct
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LevageMateriel {
+    pub id: i32,
+    pub nature: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Levage{
+    pub id: Option<i32>,
+    pub nature_id: i32,
+    pub serial: String,
+    pub cmu_kg: Option<i32>,
+    pub longueur_m: Option<f32>,
+    pub essai_charge_kg: Option<i32>,
+    pub date_mise_en_service: Option<i64>, //timestamp
+    pub assigned_to_id: Option<i32>,
+    pub emplacement_id: Option<i32>,
+    pub date_last_control: Option<i64>,
+    pub date_rebus: Option<i64>,
+    pub anomaly_id: Option<i32>,
+}

@@ -27,15 +27,23 @@ pub fn run() {
             commands::has_database,
             commands::init_database,
             commands::set_db_path,
+            
             commands::save_epi,
             commands::get_epi,
             commands::get_epi_materiel,
+            commands::delete_epi,
+
+            commands::save_levage,
+            commands::get_levage,
+            commands::get_levage_materiel,
+            commands::delete_levage,
+
             commands::get_people,
             commands::get_emplacement,
+            
             commands::get_anomaly_types,
             commands::save_anomaly,
             commands::get_anomalies,
-            commands::delete_epi,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
