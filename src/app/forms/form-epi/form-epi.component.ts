@@ -1,4 +1,4 @@
-import { Component, Input, Inject, effect, OnInit, inject } from '@angular/core';
+import { Component, Input, Inject, effect, OnInit, inject, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup,FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { EpiMateriel } from '../../model/catalogMateriel';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { confirm } from "@tauri-apps/plugin-dialog";
 
-import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+import {MatTableModule} from '@angular/material/table';
 
 import { DataModelService } from '../../services/data-model.service';
 import { Epi } from '../../model/epi';
@@ -23,9 +23,8 @@ import { Emplacement } from '../../model/emplacement';
 import { map, Observable, startWith } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { Anomaly } from '../../model/anomaly';
-import { Criticity } from '../../model/criticity';
 import { AnomalyTableComponent } from '../../components/anomaly-table/anomaly-table.component';
-import { GenerateSerialNumber } from '../../model/helpers';
+import { errorText, formDate, GenerateSerialNumber, toOptionalInt } from '../../model/helpers';
 
 @Component({
   selector: 'app-form-epi',
@@ -46,6 +45,21 @@ import { GenerateSerialNumber } from '../../model/helpers';
 })
 export class FormEpiComponent implements OnInit {
   @Input() formTitle: string = ''; // Existing input property
+  @ViewChild(AnomalyTableComponent) anomalyEditor?: AnomalyTableComponent;
+
+  compareById = (left: { id?: number } | null, right: { id?: number } | null): boolean => {
+    if (left == null || right == null) {
+      return left == null && right == null;
+    }
+    return left.id === right.id;
+  };
+
+  displayFn = (person: People | string | null): string => {
+    if (!person || typeof person === 'string') {
+      return typeof person === 'string' ? person : '';
+    }
+    return `${person.prenom} ${person.nom}`.trim();
+  };
 
   private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
   epiForm: FormGroup;
@@ -97,25 +111,28 @@ export class FormEpiComponent implements OnInit {
            this.data.epi?.serial == value ||
            (this.data.epi?.serial != value && !this.dataService.epiSerialExists(value)),
           'alreadyExists') ]],
-      nature: [data?.epi?.nature || '', Validators.required],
-      fabricationDate: [data?.epi?.date_fabrication || ''],
-      activationDate: [data?.epi?.date_mise_en_service || ''],
-      validiteYears: [data?.epi?.validite_years || '', [Validators.min(0), Validators.max(100)]],
+      nature: [data?.epi?.nature ?? null, Validators.required],
+      fabricationDate: [data?.epi?.date_fabrication || null],
+      activationDate: [data?.epi?.date_mise_en_service || null],
+      validiteYears: [data?.epi?.validite_years ?? null, [Validators.min(0), Validators.max(100)]],
       validiteLimite: [{ value: data?.epi?.validiteLimite || '', disabled: true }],
       assigned_to: this.peopleFormControl,
-      emplacement: [data?.epi?.emplacement || ''],
-      dateLastControl: [data?.epi?.date_last_control || ''],
-      dateRebus: [data?.epi?.date_rebus || ''],
+      emplacement: [data?.epi?.emplacement ?? null],
+      dateLastControl: [data?.epi?.date_last_control || null],
+      dateRebus: [data?.epi?.date_rebus || null],
     });
 
     effect(() => {
       this.epiMaterielList = this.dataService.materiels();
+      this.matchControl('nature', this.epiMaterielList);
     });
     effect(() => {
       this.peopleList = this.dataService.employees();
+      this.peopleFormControl.setValue(this.peopleFormControl.value, { emitEvent: true });
     });
     effect(() => {
       this.locationList = this.dataService.locations();
+      this.matchControl('emplacement', this.locationList);
     });
   }
 
@@ -156,7 +173,7 @@ export class FormEpiComponent implements OnInit {
     const fabricationDate = this.epiForm.get('fabricationDate')?.value;
     const validiteYears = this.epiForm.get('validiteYears')?.value;
 
-    if (fabricationDate && validiteYears >= 0) {
+    if (fabricationDate && validiteYears != null && validiteYears >= 0) {
       const fabrication = new Date(fabricationDate);
       const validiteLimite = Epi.ComputeValiditeLimite(fabrication, validiteYears);
       if(validiteLimite)
@@ -166,24 +183,43 @@ export class FormEpiComponent implements OnInit {
     }
   }
 
-  private _filterPeople(value: any): any[] {
-    if(typeof value === 'string') {
-      const filterValue = value.toLowerCase();
-      return this.peopleList.filter(option =>
-        option.nom.toLowerCase().includes(filterValue) ||
-        option.prenom.toLowerCase().includes(filterValue)
-      );
+  private _filterPeople(value: People | string | null): People[] {
+    const text = typeof value === 'string'
+      ? value
+      : value
+        ? `${value.prenom} ${value.nom}`
+        : '';
+    const filterValue = text.trim().toLowerCase();
+    if (!filterValue) {
+      return this.peopleList.slice();
     }
-    else {
-      const selectedPerson = value as People;
-      return [selectedPerson.nom];
+    return this.peopleList.filter(option =>
+      option.nom.toLowerCase().includes(filterValue) ||
+      option.prenom.toLowerCase().includes(filterValue) ||
+      `${option.prenom} ${option.nom}`.toLowerCase().includes(filterValue)
+    );
+  }
+
+  private matchControl(name: string, options: Array<{ id: number }>): void {
+    const current = this.epiForm.get(name)?.value as { id?: number } | null;
+    if (current?.id == null) {
+      return;
+    }
+    const match = options.find((item) => item.id === current.id);
+    if (match && match !== current) {
+      this.epiForm.get(name)?.setValue(match, { emitEvent: false });
     }
   }
 
-    // Function to display the selected value in the input field
-    displayFn(person: any): string {
-      return person ? `${person.prenom} ${person.nom}` : '';
+  canSubmit(): boolean {
+    if (this.epiForm.invalid) {
+      return false;
     }
+    if (!this.anomaly) {
+      return true;
+    }
+    return !!this.anomalyEditor && this.anomalyEditor.anomalyForm.valid;
+  }
 
    addAnomaly() {
     this.anomaly = new Anomaly();
@@ -192,29 +228,37 @@ export class FormEpiComponent implements OnInit {
 
   async onDelete() {
     if (await confirm('Êtes-vous sûr de vouloir supprimer cet EPI ?')) {
-      this.dataService.deleteEpi(this.formEPI); // Delete the EPI from the data service
-      this.dialogRef.close(null); // Indicate deletion to the parent component
+      try {
+        await this.dataService.deleteEpi(this.formEPI);
+        this.dialogRef.close(null);
+      } catch (error) {
+        alert(`Suppression impossible : ${errorText(error)}`);
+      }
     }
   }
 
   onSubmit() {
-    if (this.epiForm.valid) {
-      const updatedEpi = {
-        ...this.data.epi,
-        serial: this.epiForm.get('serialNumber')?.value,
-        nature: this.epiForm.get('nature')?.value,
-        date_fabrication: this.epiForm.get('fabricationDate')?.value ? new Date(this.epiForm.get('fabricationDate')?.value) : null,
-        date_mise_en_service: this.epiForm.get('activationDate')?.value ? new Date(this.epiForm.get('activationDate')?.value) : null,
-        validite_years: this.epiForm.get('validiteYears')?.value,
-        validiteLimite: this.epiForm.get('validiteLimite')?.value ? new Date(this.epiForm.get('validiteLimite')?.value) : null,
-        assigned_to: this.epiForm.get('assigned_to')?.value,
-        emplacement: this.epiForm.get('emplacement')?.value,
-        date_last_control: this.epiForm.get('dateLastControl')?.value ? new Date(this.epiForm.get('dateLastControl')?.value) : null,
-        date_rebus: this.epiForm.get('dateRebus')?.value ? new Date(this.epiForm.get('dateRebus')?.value) : null,
-        anomaly: this.anomaly
-      };
-
-      this.dialogRef.close(updatedEpi); // Return the updated EPI to the parent component
+    if (!this.canSubmit()) {
+      this.epiForm.markAllAsTouched();
+      this.anomalyEditor?.anomalyForm.markAllAsTouched();
+      return;
     }
+    const updated = new Epi();
+    updated.id = this.formEPI?.id ?? null;
+    updated.serial = this.epiForm.get('serialNumber')?.value;
+    updated.nature = this.objectOrNull(this.epiForm.get('nature')?.value);
+    updated.date_fabrication = formDate(this.epiForm.get('fabricationDate')?.value);
+    updated.date_mise_en_service = formDate(this.epiForm.get('activationDate')?.value);
+    updated.validite_years = toOptionalInt(this.epiForm.get('validiteYears')?.value);
+    updated.assigned_to = this.objectOrNull(this.epiForm.get('assigned_to')?.value);
+    updated.emplacement = this.objectOrNull(this.epiForm.get('emplacement')?.value);
+    updated.date_last_control = formDate(this.epiForm.get('dateLastControl')?.value);
+    updated.date_rebus = formDate(this.epiForm.get('dateRebus')?.value);
+    updated.anomaly = this.anomaly;
+    this.dialogRef.close(updated);
+  }
+
+  private objectOrNull<T extends object>(value: T | string | null | undefined): T | null {
+    return value && typeof value === 'object' ? value : null;
   }
 }

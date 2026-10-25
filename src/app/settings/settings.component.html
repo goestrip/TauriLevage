@@ -4,17 +4,94 @@
   <p> {{ currentDatabaseName || 'Non chargée' }}</p>
 </div>
 
-
 <div class="file-actions">
-  <button mat-raised-button color="primary" (click)="openFileDialog()">Ouvrir un fichier existant</button>
-  <button mat-raised-button color="accent" (click)="createNewFile()">Créer un nouveau fichier</button>
-  <button mat-raised-button color="accent" (click)="initDb()">force init</button>
+  <button mat-raised-button color="primary" type="button" (click)="openFileDialog()">Ouvrir un fichier existant</button>
+  <button mat-raised-button color="accent" type="button" (click)="createNewFile()">Créer un nouveau fichier</button>
+  <button mat-raised-button type="button" (click)="initDb()">Initialiser</button>
 </div>
 
 <div class="file-display">
   <span *ngIf="selectedFileName" class="file-path">{{ selectedFileName }}</span>
 </div>
 
+<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+<section class="references" *ngIf="dataModelService.isDbLoaded() && !selectedFileName">
+  <h2>Référentiels</h2>
+  <p>Une base neuve contient déjà des natures, des personnes, des emplacements et des types d'anomalie. Les éléments encore utilisés par une fiche ne peuvent pas être supprimés.</p>
+
+  <details open>
+    <summary>Natures EPI</summary>
+    <ul>
+      <li *ngFor="let item of dataModelService.materiels()">
+        <span>{{ item.nature }}</span>
+        <button mat-button type="button" color="warn" (click)="removeEpiNature(item.id, item.nature)">Supprimer</button>
+      </li>
+    </ul>
+    <div class="add-row">
+      <input [(ngModel)]="newEpiNature" placeholder="Nouvelle nature" />
+      <button mat-stroked-button type="button" (click)="addEpiNature()" [disabled]="!newEpiNature.trim()">Ajouter</button>
+    </div>
+  </details>
+
+  <details>
+    <summary>Natures levage</summary>
+    <ul>
+      <li *ngFor="let item of dataModelService.levageMateriels()">
+        <span>{{ item.nature }}</span>
+        <button mat-button type="button" color="warn" (click)="removeLevageNature(item.id, item.nature)">Supprimer</button>
+      </li>
+    </ul>
+    <div class="add-row">
+      <input [(ngModel)]="newLevageNature" placeholder="Nouvelle nature" />
+      <button mat-stroked-button type="button" (click)="addLevageNature()" [disabled]="!newLevageNature.trim()">Ajouter</button>
+    </div>
+  </details>
+
+  <details>
+    <summary>Personnes</summary>
+    <ul>
+      <li *ngFor="let item of dataModelService.employees()">
+        <span>{{ item.prenom }} {{ item.nom }}</span>
+        <button mat-button type="button" color="warn" (click)="removePerson(item.id, (item.prenom + ' ' + item.nom).trim())">Supprimer</button>
+      </li>
+    </ul>
+    <div class="add-row">
+      <input [(ngModel)]="newPrenom" placeholder="Prénom" />
+      <input [(ngModel)]="newNom" placeholder="Nom" />
+      <button mat-stroked-button type="button" (click)="addPerson()" [disabled]="!newNom.trim()">Ajouter</button>
+    </div>
+  </details>
+
+  <details>
+    <summary>Emplacements</summary>
+    <ul>
+      <li *ngFor="let item of dataModelService.locations()">
+        <span>{{ item.location }}</span>
+        <button mat-button type="button" color="warn" (click)="removeLocation(item.id, item.location)">Supprimer</button>
+      </li>
+    </ul>
+    <div class="add-row">
+      <input [(ngModel)]="newLocation" placeholder="Nouvel emplacement" />
+      <button mat-stroked-button type="button" (click)="addLocation()" [disabled]="!newLocation.trim()">Ajouter</button>
+    </div>
+  </details>
+
+  <details>
+    <summary>Types d'anomalie</summary>
+    <ul>
+      <li *ngFor="let item of dataModelService.anomalyTypes()">
+        <span>{{ item.name }}</span>
+        <button mat-button type="button" color="warn" (click)="removeAnomalyType(item.id, item.name)">Supprimer</button>
+      </li>
+    </ul>
+    <div class="add-row">
+      <input [(ngModel)]="newAnomalyType" placeholder="Nouveau type" />
+      <button mat-stroked-button type="button" (click)="addAnomalyType()" [disabled]="!newAnomalyType.trim()">Ajouter</button>
+    </div>
+  </details>
+</section>
+
 <div>
-  <button mat-raised-button color="accent" (click)="applySettings()">Valider</button>
+  <button mat-raised-button color="accent" type="button" (click)="applySettings()">Valider</button>
 </div>

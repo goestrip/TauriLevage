@@ -9,11 +9,12 @@ import { ControlDates } from "./controlDates";
 
 
 export class Levage{
-    public id: number = 0;
+    public id: number | null = null;
     public nature: LevageMateriel | null = null;
     public serial: string = uuidv4().toString().slice(0, 8);
-    public date_mise_en_service: Date | undefined;
-    public cmu_kg: number = 0;
+    public date_mise_en_service: Date | null = null;
+    public cmu_kg: number | null = null;
+    public longueur_m: number | null = null;
     public essai_charge: number|null = null;
     
     public assigned_to: People|null = null;
@@ -48,6 +49,7 @@ export class Levage{
         this.nature = other.nature;
         this.serial = other.serial;
         this.cmu_kg = other.cmu_kg;
+        this.longueur_m = other.longueur_m;
         this.essai_charge = other.essai_charge;
         this.date_mise_en_service = other.date_mise_en_service;
         this.assigned_to = other.assigned_to;

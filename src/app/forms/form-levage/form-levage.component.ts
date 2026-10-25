@@ -1,6 +1,6 @@
-import { Component, Input, Inject, effect, OnInit, inject } from '@angular/core';
+import { Component, Input, Inject, effect, OnInit, inject, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup,FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { EpiMateriel, LevageMateriel } from '../../model/catalogMateriel';
+import { LevageMateriel } from '../../model/catalogMateriel';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,7 +13,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { confirm } from "@tauri-apps/plugin-dialog";
 
-import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+import {MatTableModule} from '@angular/material/table';
 
 import { DataModelService } from '../../services/data-model.service';
 import { predicateValidator } from '../validators/serial-validator';
@@ -22,9 +22,8 @@ import { Emplacement } from '../../model/emplacement';
 import { map, Observable, startWith } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { Anomaly } from '../../model/anomaly';
-import { Criticity } from '../../model/criticity';
 import { AnomalyTableComponent } from '../../components/anomaly-table/anomaly-table.component';
-import { GenerateSerialNumber } from '../../model/helpers';
+import { errorText, formDate, GenerateSerialNumber, toOptionalInt, toOptionalNumber } from '../../model/helpers';
 import { Levage } from '../../model/levage';
 
 @Component({
@@ -45,10 +44,25 @@ import { Levage } from '../../model/levage';
   styleUrl: './form-levage.component.scss'
 })
 export class FormLevageComponent implements OnInit {
-  @Input() formTitle: string = ''; // Existing input property
+  @Input() formTitle: string = '';
+  @ViewChild(AnomalyTableComponent) anomalyEditor?: AnomalyTableComponent;
+
+  compareById = (left: { id?: number } | null, right: { id?: number } | null): boolean => {
+    if (left == null || right == null) {
+      return left == null && right == null;
+    }
+    return left.id === right.id;
+  };
+
+  displayFn = (person: People | string | null): string => {
+    if (!person || typeof person === 'string') {
+      return typeof person === 'string' ? person : '';
+    }
+    return `${person.prenom} ${person.nom}`.trim();
+  };
 
   private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
-  epiForm: FormGroup;
+  levageForm: FormGroup;
 
   formLevage: Levage|null = null; // EPI form data
   anomaly : Anomaly|null = null; // Anomaly data
@@ -79,32 +93,35 @@ export class FormLevageComponent implements OnInit {
       this.anomaly = data.levage.anomaly; // Set anomaly from EPI data if provided
     }
 
-    this.epiForm = this.fb.group({
+    this.levageForm = this.fb.group({
       serialNumber: [data?.levage?.serial || '', [
          Validators.required, Validators.maxLength(100),
          predicateValidator((value) =>
            this.data.levage?.serial == value ||
-           (this.data.levage?.serial != value && !this.dataService.epiSerialExists(value)),
+           (this.data.levage?.serial != value && !this.dataService.levageSerialExists(value)),
           'alreadyExists') ]],
-      nature: [data?.levage?.nature || '', Validators.required],
-      cmuKg: [data?.levage?.cmu_kg || '', Validators.required],
-      essaiCharge: [data?.levage?.essai_charge || ''],
-      activationDate: [data?.levage?.date_mise_en_service || ''],
-      
+      nature: [data?.levage?.nature ?? null, Validators.required],
+      cmuKg: [data?.levage?.cmu_kg ?? null, Validators.required],
+      longueurM: [data?.levage?.longueur_m ?? null],
+      essaiCharge: [data?.levage?.essai_charge ?? null],
+      activationDate: [data?.levage?.date_mise_en_service || null],
       assigned_to: this.peopleFormControl,
-      emplacement: [data?.levage?.emplacement || ''],
-      dateLastControl: [data?.levage?.date_last_control || ''],
-      dateRebus: [data?.levage?.date_rebus || ''],
+      emplacement: [data?.levage?.emplacement ?? null],
+      dateLastControl: [data?.levage?.date_last_control || null],
+      dateRebus: [data?.levage?.date_rebus || null],
     });
 
     effect(() => {
       this.levageMaterielList = this.dataService.levageMateriels();
+      this.matchControl('nature', this.levageMaterielList);
     });
     effect(() => {
       this.peopleList = this.dataService.employees();
+      this.peopleFormControl.setValue(this.peopleFormControl.value, { emitEvent: true });
     });
     effect(() => {
       this.locationList = this.dataService.locations();
+      this.matchControl('emplacement', this.locationList);
     });
   }
 
@@ -119,30 +136,49 @@ export class FormLevageComponent implements OnInit {
   }
 
   generateSerialNumber(){
-    const materiel = this.epiForm.get('nature')?.value;
-    if(!materiel) return; // If nature is not selected, do nothing
-    const serial = GenerateSerialNumber(materiel.nature); // Generate serial number based on nature
-    this.epiForm.get('serialNumber')?.setValue(serial);
+    const materiel = this.levageForm.get('nature')?.value;
+    if(!materiel) return;
+    const serial = GenerateSerialNumber(materiel.nature);
+    this.levageForm.get('serialNumber')?.setValue(serial);
   }
 
-  private _filterPeople(value: any): any[] {
-    if(typeof value === 'string') {
-      const filterValue = value.toLowerCase();
-      return this.peopleList.filter(option =>
-        option.nom.toLowerCase().includes(filterValue) ||
-        option.prenom.toLowerCase().includes(filterValue)
-      );
+  private _filterPeople(value: People | string | null): People[] {
+    const text = typeof value === 'string'
+      ? value
+      : value
+        ? `${value.prenom} ${value.nom}`
+        : '';
+    const filterValue = text.trim().toLowerCase();
+    if (!filterValue) {
+      return this.peopleList.slice();
     }
-    else {
-      const selectedPerson = value as People;
-      return [selectedPerson.nom];
+    return this.peopleList.filter(option =>
+      option.nom.toLowerCase().includes(filterValue) ||
+      option.prenom.toLowerCase().includes(filterValue) ||
+      `${option.prenom} ${option.nom}`.toLowerCase().includes(filterValue)
+    );
+  }
+
+  private matchControl(name: string, options: Array<{ id: number }>): void {
+    const current = this.levageForm.get(name)?.value as { id?: number } | null;
+    if (current?.id == null) {
+      return;
+    }
+    const match = options.find((item) => item.id === current.id);
+    if (match && match !== current) {
+      this.levageForm.get(name)?.setValue(match, { emitEvent: false });
     }
   }
 
-    // Function to display the selected value in the input field
-    displayFn(person: any): string {
-      return person ? `${person.prenom} ${person.nom}` : '';
+  canSubmit(): boolean {
+    if (this.levageForm.invalid) {
+      return false;
     }
+    if (!this.anomaly) {
+      return true;
+    }
+    return !!this.anomalyEditor && this.anomalyEditor.anomalyForm.valid;
+  }
 
    addAnomaly() {
     this.anomaly = new Anomaly();
@@ -150,29 +186,39 @@ export class FormLevageComponent implements OnInit {
    }
 
   async onDelete() {
-    if (await confirm('Êtes-vous sûr de vouloir supprimer cet EPI ?')) {
-      this.dataService.deleteLevage(this.formLevage); // Delete the EPI from the data service
-      this.dialogRef.close(null); // Indicate deletion to the parent component
+    if (await confirm('Êtes-vous sûr de vouloir supprimer ce matériel de levage ?')) {
+      try {
+        await this.dataService.deleteLevage(this.formLevage);
+        this.dialogRef.close(null);
+      } catch (error) {
+        alert(`Suppression impossible : ${errorText(error)}`);
+      }
     }
   }
 
   onSubmit() {
-    if (this.epiForm.valid) {
-      const updatedLevage = {
-        ...this.data.levage,
-        serial: this.epiForm.get('serialNumber')?.value,
-        nature: this.epiForm.get('nature')?.value,
-        date_mise_en_service: this.epiForm.get('activationDate')?.value ? new Date(this.epiForm.get('activationDate')?.value) : null,
-        cmu_kg: this.epiForm.get('cmuKg')?.value,
-        essai_charge: this.epiForm.get('essaiCharge')?.value,
-        assigned_to: this.epiForm.get('assigned_to')?.value,
-        emplacement: this.epiForm.get('emplacement')?.value,
-        date_last_control: this.epiForm.get('dateLastControl')?.value ? new Date(this.epiForm.get('dateLastControl')?.value) : null,
-        date_rebus: this.epiForm.get('dateRebus')?.value ? new Date(this.epiForm.get('dateRebus')?.value) : null,
-        anomaly: this.anomaly
-      };
-
-      this.dialogRef.close(updatedLevage); // Return the updated EPI to the parent component
+    if (!this.canSubmit()) {
+      this.levageForm.markAllAsTouched();
+      this.anomalyEditor?.anomalyForm.markAllAsTouched();
+      return;
     }
+    const updated = new Levage();
+    updated.id = this.formLevage?.id ?? null;
+    updated.serial = this.levageForm.get('serialNumber')?.value;
+    updated.nature = this.objectOrNull(this.levageForm.get('nature')?.value);
+    updated.date_mise_en_service = formDate(this.levageForm.get('activationDate')?.value);
+    updated.cmu_kg = toOptionalInt(this.levageForm.get('cmuKg')?.value);
+    updated.longueur_m = toOptionalNumber(this.levageForm.get('longueurM')?.value);
+    updated.essai_charge = toOptionalInt(this.levageForm.get('essaiCharge')?.value);
+    updated.assigned_to = this.objectOrNull(this.levageForm.get('assigned_to')?.value);
+    updated.emplacement = this.objectOrNull(this.levageForm.get('emplacement')?.value);
+    updated.date_last_control = formDate(this.levageForm.get('dateLastControl')?.value);
+    updated.date_rebus = formDate(this.levageForm.get('dateRebus')?.value);
+    updated.anomaly = this.anomaly;
+    this.dialogRef.close(updated);
+  }
+
+  private objectOrNull<T extends object>(value: T | string | null | undefined): T | null {
+    return value && typeof value === 'object' ? value : null;
   }
 }

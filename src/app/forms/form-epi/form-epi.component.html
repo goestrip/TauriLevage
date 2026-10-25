@@ -5,7 +5,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Nature</mat-label>
-      <mat-select formControlName="nature">
+      <mat-select formControlName="nature" [compareWith]="compareById">
         <mat-option *ngFor="let item of epiMaterielList" [value]="item">
           {{ item.nature }}
         </mat-option>
@@ -58,7 +58,7 @@
       <mat-label>Assignation</mat-label>
     
       <input type="text" matInput [formControl]="peopleFormControl" [matAutocomplete]="auto">
-      <button mat-icon-button matSuffix *ngIf="peopleFormControl.value" (click)="peopleFormControl.reset()">
+      <button mat-icon-button matSuffix type="button" *ngIf="peopleFormControl.value" (click)="peopleFormControl.reset()">
         <mat-icon>clear</mat-icon>
       </button>
       <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -70,12 +70,12 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Emplacement</mat-label>
-      <mat-select formControlName="emplacement">
+      <mat-select formControlName="emplacement" [compareWith]="compareById">
       <mat-option *ngFor="let item of locationList" [value]="item">
         {{ item.location }}
       </mat-option>
       </mat-select>
-      <button mat-icon-button matSuffix *ngIf="epiForm.get('emplacement')?.value" (click)="epiForm.get('emplacement')?.reset()">
+      <button mat-icon-button matSuffix type="button" *ngIf="epiForm.get('emplacement')?.value" (click)="epiForm.get('emplacement')?.reset()">
        <mat-icon>clear</mat-icon>
       </button>
     </mat-form-field>
@@ -108,7 +108,7 @@
   </div>
   <div class="button-container fixed-buttons">
     <button mat-raised-button color="warn" type="button" (click)="onDelete()" class="delete-button">Supprimer EPI</button>
-    <button mat-raised-button color="primary" type="submit" [disabled]="!epiForm.valid" class="save-button">Enregistrer</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit()" class="save-button">Enregistrer</button>
   </div>
 </form>
 </div>

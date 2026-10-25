@@ -9,11 +9,11 @@ import { ControlDates } from "./controlDates";
 
 
 export class Epi{
-    public id: number = 0;
+    public id: number | null = null;
     public nature: EpiMateriel | null = null;
     public serial: string = uuidv4().toString().slice(0, 8);
-    public date_fabrication: Date | undefined ;
-    public date_mise_en_service: Date | undefined;
+    public date_fabrication: Date | null = null;
+    public date_mise_en_service: Date | null = null;
     public validite_years: number |null = null;
     public get validiteLimite(): Date | undefined{
         if(this.date_fabrication){
@@ -40,7 +40,7 @@ export class Epi{
         else return null;
     }
 
-    public static ComputeValiditeLimite(date_fabrication: Date | undefined, validite_years: number|null): Date | undefined {
+    public static ComputeValiditeLimite(date_fabrication: Date | null | undefined, validite_years: number|null): Date | undefined {
         if(date_fabrication && validite_years){
             return new Date(date_fabrication.getTime() + validite_years * YEAR_TO_MS);
         }

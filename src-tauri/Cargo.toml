@@ -15,17 +15,16 @@ name = "levage_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
-tauri-plugin-opener = "2"
+tauri = { version = "2.12.5", features = [] }
+tauri-plugin-opener = "2.7.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-chrono = {version = "0.4.40", features = ["serde"] }
-rusqlite = {version ="0.34.0", features = ["bundled"] }
+chrono = { version = "0.4.40", features = ["serde"] }
+rusqlite = { version = "0.41.0", features = ["bundled"] }
 configparser = "3.0.5"
-tauri-plugin-log = "2"
+tauri-plugin-log = "2.10.1"
 log = "0.4"
-tauri-plugin-dialog = "2"
-
+tauri-plugin-dialog = "2.8.3"

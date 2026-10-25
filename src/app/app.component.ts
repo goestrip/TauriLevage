@@ -17,6 +17,7 @@ import { FormEpiComponent } from './forms/form-epi/form-epi.component';
 import { FormLevageComponent } from './forms/form-levage/form-levage.component';
 import { Levage } from './model/levage';
 import { Epi } from './model/epi';
+import { errorText } from './model/helpers';
 
 
 @Component({
@@ -44,10 +45,6 @@ export class AppComponent {
 
     effect(() => {
       this.isDbLoaded = this.dataService.isDbLoaded();
-      console.log("isDbLoaded", this.dataService.isDbLoaded());
-      if (this.dataService.isDbLoaded()) {
-        this.dataService.loadDatabase();
-      }
     });
    }
 
@@ -72,9 +69,14 @@ export class AppComponent {
         data: { formTitle: 'Ajout EPI' }
       });
       
-      dialogRef.afterClosed().subscribe((updatedData:Epi|null) => {
-        if (updatedData) {
-          this.dataService.addEpi(updatedData); // Adjust this method if needed for other forms
+      dialogRef.afterClosed().subscribe(async (updatedData: Epi | null) => {
+        if (!updatedData) {
+          return;
+        }
+        try {
+          await this.dataService.addEpi(updatedData);
+        } catch (error) {
+          alert(`Enregistrement impossible : ${errorText(error)}`);
         }
       });
       
@@ -87,9 +89,14 @@ export class AppComponent {
         maxHeight: '90vh',
         data: { formTitle: 'Ajout Levage' }
       });
-      dialogRef.afterClosed().subscribe((updatedData:Levage|null) => {
-        if (updatedData) {
-          this.dataService.addLevage(updatedData); // Adjust this method if needed for other forms
+      dialogRef.afterClosed().subscribe(async (updatedData: Levage | null) => {
+        if (!updatedData) {
+          return;
+        }
+        try {
+          await this.dataService.addLevage(updatedData);
+        } catch (error) {
+          alert(`Enregistrement impossible : ${errorText(error)}`);
         }
       });
 
@@ -106,16 +113,16 @@ export class AppComponent {
       width: '600px'
     });
 
-    dialogRef.afterClosed().subscribe((db_path) => {
-      if (db_path) {
-        console.log('Received full path from settings dialog:', db_path);
-        // Handle the full path here
-        invoke<string>("set_db_path", {dbPath: db_path}).then((result: string) => {
-          console.log("db path set ,", result);
-        })
-        .then(() => {
-          this.dataService.loadDatabase();
-        });
+    dialogRef.afterClosed().subscribe(async (db_path) => {
+      if (!db_path) {
+        return;
+      }
+      try {
+        await invoke<string>("set_db_path", { dbPath: db_path });
+        await this.dataService.reloadDatabase();
+      } catch (error) {
+        console.error(error);
+        alert(`Impossible d'ouvrir la base : ${errorText(error)}`);
       }
     });
   }
