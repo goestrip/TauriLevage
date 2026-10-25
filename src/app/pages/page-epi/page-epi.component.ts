@@ -19,6 +19,8 @@ import { DataModelService } from '../../services/data-model.service';
 import { Criticity } from '../../model/criticity';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { EpiMateriel } from '../../model/catalogMateriel';
+import { downloadCsv, ImportResult } from '../../model/csv';
+import { errorText } from '../../model/helpers';
 
 
 @Component({
@@ -63,6 +65,7 @@ export class PageEpiComponent {
   epiData: MatTableDataSource<Epi>;
   epiMateriel: EpiMateriel[] = [];
   filter: string = '';
+  importStatus = '';
 
   editingRow: any = null;
   readonly dialog = inject(MatDialog); // Inject MatDialog
@@ -93,16 +96,19 @@ export class PageEpiComponent {
     });
 
 
-    dialogRef.afterClosed().subscribe((updatedEpi: Epi) => {
-      if (updatedEpi) {
-        (epi as Epi).copyFrom(updatedEpi); // Update the EPI with the changes
-        this.saveRow(epi); // Save the updated EPI
+    dialogRef.afterClosed().subscribe(async (updatedEpi: Epi | null) => {
+      if (!updatedEpi) {
+        return;
+      }
+      epi.copyFrom(updatedEpi);
+      try {
+        await this.dataService.saveEpi(epi);
+      } catch (error) {
+        console.error(error);
+        alert(`Enregistrement impossible : ${errorText(error)}`);
+        await this.dataService.reloadDatabase();
       }
     });
-  }
-
-  saveRow(epi: any): void {
-    this.dataService.saveEpi(epi); // Save the EPI to the data service
   }
 
   getValidityClass(epi: Epi): string {
@@ -189,22 +195,37 @@ export class PageEpiComponent {
     }
   }
 
-  importCsv() {
-    // Implement CSV import functionality here
-    console.log('Importing CSV...');
+  exportCsv(): void {
+    downloadCsv(`epi-${this.fileStamp()}.csv`, this.dataService.exportEpiCsv());
   }
 
   handleFileInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const csvData = e.target?.result as string;
-        this.dataService.parseCsvData(csvData);
-      };
-      reader.readAsText(file);
+    const file = input.files?.[0];
+    if (!file) {
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const csvData = e.target?.result as string;
+      try {
+        const result = await this.dataService.importEpiCsv(csvData);
+        this.importStatus = this.formatImportResult(result);
+      } catch (error) {
+        this.importStatus = `Import impossible : ${errorText(error)}`;
+      }
+      input.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  private formatImportResult(result: ImportResult): string {
+    const details = result.errors.slice(0, 3).join(' ');
+    return `${result.imported} ligne(s) importée(s), ${result.skipped} ignorée(s). ${details}`.trim();
+  }
+
+  private fileStamp(): string {
+    return new Date().toISOString().slice(0, 10);
   }
   
 }

@@ -1,11 +1,13 @@
-<div *ngIf="anomaly() as currentAnomaly" class="container">
-  <form [formGroup]="anomalyForm" (ngSubmit)="saveAnomaly()">
-    
+<div *ngIf="anomaly()" class="container">
+  <form [formGroup]="anomalyForm">
     <mat-form-field appearance="outline">
         <mat-label>Date de détection</mat-label>
         <input matInput [matDatepicker]="detectionPicker" formControlName="date_detection" />
         <mat-datepicker-toggle matSuffix [for]="detectionPicker"></mat-datepicker-toggle>
         <mat-datepicker #detectionPicker></mat-datepicker>
+        <mat-error *ngIf="anomalyForm.get('date_detection')?.hasError('required')">
+          Date requise.
+        </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -20,27 +22,31 @@
     <mat-form-field appearance="outline">
         <mat-label>Date de résolution</mat-label>
         <input matInput [matDatepicker]="resolutionPicker" formControlName="date_resolution" />
+        <button mat-icon-button matSuffix type="button" *ngIf="anomalyForm.get('date_resolution')?.value" (click)="clearResolution($event)" aria-label="Effacer la date de résolution">
+          <mat-icon>close</mat-icon>
+        </button>
         <mat-datepicker-toggle matSuffix [for]="resolutionPicker"></mat-datepicker-toggle>
         <mat-datepicker #resolutionPicker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
         <mat-label>Type</mat-label>
-        <mat-select formControlName="anomaly_type" required>
-          @for (type of anomalyTypes; track type) {
+        <mat-select formControlName="anomaly_type" required [compareWith]="compareById">
+          @for (type of anomalyTypes; track type.id) {
             <mat-option [value]="type">{{type.name}}</mat-option>
           }
         </mat-select>
+        <mat-error *ngIf="anomalyForm.get('anomaly_type')?.hasError('required')">
+          Type requis.
+        </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Description</mat-label>
       <textarea matInput formControlName="description"></textarea>
     </mat-form-field>
-  
-   
   </form>
 </div>
 <div *ngIf="!anomaly()">
-  <p>No anomaly selected.</p>
+  <p>Aucune anomalie.</p>
 </div>

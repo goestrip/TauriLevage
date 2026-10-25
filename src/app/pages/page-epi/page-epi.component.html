@@ -12,12 +12,16 @@
   <div class="spacer"></div> <!-- Add a spacer to push the button to the end -->
   
   <div class="import-container">
-    <button mat-raised-button color="primary" (click)="fileInput.click()">
-      Import CSV
+    <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">
+      Importer CSV
     </button>
-    <input type="file" #fileInput accept=".csv" style="display: none;" (change)="handleFileInput($event)">
+    <button mat-raised-button type="button" (click)="exportCsv()">
+      Exporter CSV
+    </button>
+    <input type="file" #fileInput accept=".csv,text/csv" style="display: none;" (change)="handleFileInput($event)">
   </div>
 </div>
+<p class="import-status" *ngIf="importStatus">{{ importStatus }}</p>
 
 <table mat-table matSort  [dataSource]="epiData" (matSortChange)="announceSortChange($event)">
   
@@ -41,7 +45,7 @@
     <th mat-header-cell mat-sort-header *matHeaderCellDef> Nature
      </th>
     <td mat-cell *matCellDef="let epi">
-        {{epi.nature.nature}}
+        {{epi.nature?.nature}}
     </td>
   </ng-container>
 

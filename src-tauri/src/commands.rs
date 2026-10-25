@@ -1,264 +1,227 @@
-use std::io::{self, Write};
+use rusqlite::Connection;
 use tauri::State;
 
-use crate::{database, model::{Anomaly, Epi, Levage}, state::AppConfigData};
+use crate::{
+    database,
+    model::{Anomaly, Epi, Levage},
+    state::AppConfigData,
+};
+
+fn with_connection<T>(
+    state: &AppConfigData,
+    action: impl FnOnce(&Connection) -> Result<T, String>,
+) -> Result<T, String> {
+    let guard = state.connection.lock().map_err(|err| err.to_string())?;
+    let connection = guard
+        .as_ref()
+        .ok_or_else(|| "No Database connection".to_string())?;
+    action(connection)
+}
+
+fn to_json<T: serde::Serialize>(value: &T) -> Result<String, String> {
+    serde_json::to_string(value).map_err(|err| err.to_string())
+}
 
 #[tauri::command]
 pub fn has_database(state: State<AppConfigData>) -> Result<bool, String> {
-    state.load_ini().map_err(|e| e.to_string())?;
-    let db_path = state.db_path.lock().unwrap().clone();
-
+    state.load_ini()?;
+    let db_path = state.db_path.lock().map_err(|err| err.to_string())?.clone();
     if db_path.is_empty() {
         return Ok(false);
     }
-    if std::path::Path::new(&db_path).exists() {
-        Ok(true)
-    } else {
-        Ok(false)
-    }
+    Ok(std::path::Path::new(&db_path).exists())
 }
 
 #[tauri::command]
 pub fn init_database(state: State<AppConfigData>) -> Result<String, String> {
-    state.load_ini().map_err(|e| e.to_string())?;
-    let db_path = state.db_path.lock().unwrap().clone();
+    state.load_ini()?;
+    let db_path = state.db_path.lock().map_err(|err| err.to_string())?.clone();
+    if db_path.trim().is_empty() {
+        return Err("Chemin de base de données vide".to_string());
+    }
+    if let Some(parent) = std::path::Path::new(&db_path).parent() {
+        if !parent.as_os_str().is_empty() {
+            std::fs::create_dir_all(parent).map_err(|err| {
+                format!(
+                    "Impossible de créer le dossier de la base {}: {err}",
+                    parent.display()
+                )
+            })?;
+        }
+    }
 
-    let connection = database::open_db(&db_path).map_err(|e| e.to_string())?;
-    database::init_db(&connection).map_err(|e| e.to_string())?;
-    *state.connection.lock().unwrap() = Some(connection);
-
-    log::info!("Database initialized at {}", db_path);
+    let connection = database::open_db(&db_path)?;
+    database::init_db(&connection)?;
+    *state.connection.lock().map_err(|err| err.to_string())? = Some(connection);
+    log::info!("Database initialized at {db_path}");
     Ok("Database initialized".to_string())
 }
 
 #[tauri::command]
 pub fn set_db_path(state: State<AppConfigData>, db_path: String) -> Result<String, String> {
-    log::info!("setting Database path to {}", db_path);
-    state.set_db_path(db_path.clone()).map_err(|e| e.to_string())?;
-    Ok(db_path)
+    log::info!("setting Database path to {db_path}");
+    state.set_db_path(db_path)
 }
 
 #[tauri::command]
-pub fn save_epi(state: State<AppConfigData>, epi: String) -> String {
-    log::info!("save_epi {}", epi);
-    let epi_parsed: Epi = serde_json::from_str(&epi).unwrap();
-
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        eprintln!("Database connection is None");
-        return "Database connection is None".to_string();
-    }
-    let saved = database::save_epi(&connection, &epi_parsed);
-    match saved {
-        Ok(_) => {
-            println!("Epi saved");
-            io::stdout().flush().expect("Unable to flush stdout");
-        }
-        Err(e) => eprintln!("Error saving epi: {}", e),
-    }
-
-    serde_json::to_string(&epi_parsed).unwrap()
+pub fn save_epi(state: State<AppConfigData>, epi: String) -> Result<i32, String> {
+    log::info!("save_epi {epi}");
+    let epi_parsed: Epi = serde_json::from_str(&epi).map_err(|err| err.to_string())?;
+    with_connection(state.inner(), |connection| {
+        database::save_epi(connection, &epi_parsed)
+    })
 }
 
 #[tauri::command]
 pub fn get_epi_materiel(state: State<AppConfigData>) -> Result<String, String> {
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        return Err("No Database connection ".to_string());
-    }
-
-    let epi_materiel = database::get_all_epi_materiel(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&epi_materiel).unwrap())
+    let materiel = with_connection(state.inner(), database::get_all_epi_materiel)?;
+    to_json(&materiel)
 }
 
 #[tauri::command]
 pub fn get_epi(state: State<AppConfigData>) -> Result<String, String> {
-    log::info!("get_epi");
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("No Database connection in state");
-        return Err("No Database connection ".to_string());
-    }
-    let epi = database::get_all_epi(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&epi).unwrap())
+    let epis = with_connection(state.inner(), database::get_all_epi)?;
+    to_json(&epis)
 }
 
 #[tauri::command]
-pub fn get_people(state: State<AppConfigData>) -> Result<String, String> {
-    log::info!("get_people");
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("No Database connection in state");
-        return Err("No Database connection ".to_string());
-    }
-    let people = database::get_all_people(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&people).unwrap())
-}
-#[tauri::command]
-pub fn get_emplacement(state: State<AppConfigData>) -> Result<String, String> {
-    log::info!("get_emplacement");
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("No Database connection in state");
-        return Err("No Database connection ".to_string());
-    }
-    let emplacement = database::get_all_emplacement(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&emplacement).unwrap())
-}
-#[tauri::command]
-pub fn get_anomaly_types(state: State<AppConfigData>) -> Result<String, String> {
-    log::info!("get_anomaly_types");
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("No Database connection in state");
-        return Err("No Database connection ".to_string());
-    }
-    let anomaly_types = database::get_anomaly_types(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&anomaly_types).unwrap())
-}
-#[tauri::command]
-pub fn save_anomaly(state: State<AppConfigData>,anomaly: String,) -> Result<String, String> {
-    log::info!("save_anomaly {}", anomaly);
-    let anomaly_parsed: Anomaly = serde_json::from_str(&anomaly).unwrap();
-
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("Database connection is None");
-        return Err("Database connection is None".to_string());
-    }
-    let saved = database::save_anomaly(&connection, &anomaly_parsed);
-    let mut inserted_id: i32 = 0;
-    match saved {
-        Ok(id) => {
-            log::info!("Anomaly saved with id {}", id);
-            inserted_id = id;
-        }
-        Err(e) => log::error!("Error saving anomaly: {}", e),
-    }
-
-    Ok(inserted_id.to_string())
-}
-#[tauri::command]
-pub fn get_anomalies(state: State<AppConfigData>) -> Result<String, String> {
-    log::info!("get_anomalies");
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("No Database connection in state");
-        return Err("No Database connection ".to_string());
-    }
-    let anomalies = database::get_all_anomalies(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&anomalies).unwrap())
+pub fn delete_epi(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    log::info!("delete_epi {id}");
+    with_connection(state.inner(), |connection| database::delete_epi(connection, id))
 }
 
 #[tauri::command]
-pub fn delete_epi(state: State<AppConfigData>, id: String) -> Result<bool, String> {
-    log::info!("delete_epi {}", id);
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("Database connection is None");
-        return Err("Database connection is None".to_string());
-    }
-    let epi_id: i32 = match id.parse() {
-        Ok(id) => id,
-        Err(_) => {
-            log::error!("Invalid epi_id: {}", id);
-            return Err("Invalid epi_id".to_string());
-        }
-    };
-    let deleted = database::delete_epi(&connection, epi_id);
-    match deleted {
-        Ok(_) => {
-            log::info!("Epi deleted");
-            io::stdout().flush().expect("Unable to flush stdout");
-            Ok(true)
-        }
-        Err(e) =>{
-            log::error!("Error deleting epi: {}", e);
-            Ok(false)
-        } 
-    }
-
+pub fn add_epi_materiel(state: State<AppConfigData>, nature: String) -> Result<i32, String> {
+    with_connection(state.inner(), |connection| {
+        database::add_epi_materiel(connection, &nature)
+    })
 }
 
 #[tauri::command]
-pub fn save_levage(state: State<AppConfigData>, levage: String) -> String {
-    log::info!("save_levage {}", levage);
-    let levage_parsed: Levage = serde_json::from_str(&levage).unwrap();
+pub fn delete_epi_materiel(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    with_connection(state.inner(), |connection| {
+        database::delete_epi_materiel(connection, id)
+    })
+}
 
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        eprintln!("Database connection is None");
-        return "Database connection is None".to_string();
-    }
-    let saved = database::save_levage(&connection, &levage_parsed);
-    match saved {
-        Ok(_) => {
-            println!("Levage saved");
-            io::stdout().flush().expect("Unable to flush stdout");
-        }
-        Err(e) => eprintln!("Error saving levage: {}", e),
-    }
-
-    serde_json::to_string(&levage_parsed).unwrap()
+#[tauri::command]
+pub fn save_levage(state: State<AppConfigData>, levage: String) -> Result<i32, String> {
+    log::info!("save_levage {levage}");
+    let levage_parsed: Levage = serde_json::from_str(&levage).map_err(|err| err.to_string())?;
+    with_connection(state.inner(), |connection| {
+        database::save_levage(connection, &levage_parsed)
+    })
 }
 
 #[tauri::command]
 pub fn get_levage_materiel(state: State<AppConfigData>) -> Result<String, String> {
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        return Err("No Database connection ".to_string());
-    }
-
-    let levage_materiel = database::get_all_levage_materiel(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&levage_materiel).unwrap())
+    let materiel = with_connection(state.inner(), database::get_all_levage_materiel)?;
+    to_json(&materiel)
 }
 
 #[tauri::command]
 pub fn get_levage(state: State<AppConfigData>) -> Result<String, String> {
-    log::info!("get_levage");
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("No Database connection in state");
-        return Err("No Database connection ".to_string());
-    }
-    let levage = database::get_all_levage(&connection).map_err(|e| e.to_string())?;
-
-    Ok(serde_json::to_string(&levage).unwrap())
+    let levages = with_connection(state.inner(), database::get_all_levage)?;
+    to_json(&levages)
 }
 
 #[tauri::command]
-pub fn delete_levage(state: State<AppConfigData>, id: String) -> Result<bool, String> {
-    log::info!("delete_levage {}", id);
-    let connection = state.connection.lock().unwrap();
-    if connection.is_none() {
-        log::error!("Database connection is None");
-        return Err("Database connection is None".to_string());
-    }
-    let levage_id: i32 = match id.parse() {
-        Ok(id) => id,
-        Err(_) => {
-            log::error!("Invalid levage_id: {}", id);
-            return Err("Invalid levage_id".to_string());
-        }
-    };
-    let deleted = database::delete_levage(&connection, levage_id);
-    match deleted {
-        Ok(_) => {
-            log::info!("Levage deleted");
-            io::stdout().flush().expect("Unable to flush stdout");
-            Ok(true)
-        }
-        Err(e) =>{
-            log::error!("Error deleting levage: {}", e);
-            Ok(false)
-        } 
-    }
+pub fn delete_levage(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    log::info!("delete_levage {id}");
+    with_connection(state.inner(), |connection| {
+        database::delete_levage(connection, id)
+    })
+}
 
+#[tauri::command]
+pub fn add_levage_materiel(state: State<AppConfigData>, nature: String) -> Result<i32, String> {
+    with_connection(state.inner(), |connection| {
+        database::add_levage_materiel(connection, &nature)
+    })
+}
+
+#[tauri::command]
+pub fn delete_levage_materiel(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    with_connection(state.inner(), |connection| {
+        database::delete_levage_materiel(connection, id)
+    })
+}
+
+#[tauri::command]
+pub fn get_people(state: State<AppConfigData>) -> Result<String, String> {
+    let people = with_connection(state.inner(), database::get_all_people)?;
+    to_json(&people)
+}
+
+#[tauri::command]
+pub fn add_person(
+    state: State<AppConfigData>,
+    prenom: String,
+    nom: String,
+) -> Result<i32, String> {
+    with_connection(state.inner(), |connection| {
+        database::add_person(connection, &prenom, &nom)
+    })
+}
+
+#[tauri::command]
+pub fn delete_person(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    with_connection(state.inner(), |connection| {
+        database::delete_person(connection, id)
+    })
+}
+
+#[tauri::command]
+pub fn get_emplacement(state: State<AppConfigData>) -> Result<String, String> {
+    let emplacements = with_connection(state.inner(), database::get_all_emplacement)?;
+    to_json(&emplacements)
+}
+
+#[tauri::command]
+pub fn add_emplacement(state: State<AppConfigData>, location: String) -> Result<i32, String> {
+    with_connection(state.inner(), |connection| {
+        database::add_emplacement(connection, &location)
+    })
+}
+
+#[tauri::command]
+pub fn delete_emplacement(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    with_connection(state.inner(), |connection| {
+        database::delete_emplacement(connection, id)
+    })
+}
+
+#[tauri::command]
+pub fn get_anomaly_types(state: State<AppConfigData>) -> Result<String, String> {
+    let types = with_connection(state.inner(), database::get_anomaly_types)?;
+    to_json(&types)
+}
+
+#[tauri::command]
+pub fn add_anomaly_type(state: State<AppConfigData>, name: String) -> Result<i32, String> {
+    with_connection(state.inner(), |connection| {
+        database::add_anomaly_type(connection, &name)
+    })
+}
+
+#[tauri::command]
+pub fn delete_anomaly_type(state: State<AppConfigData>, id: i32) -> Result<(), String> {
+    with_connection(state.inner(), |connection| {
+        database::delete_anomaly_type(connection, id)
+    })
+}
+
+#[tauri::command]
+pub fn save_anomaly(state: State<AppConfigData>, anomaly: String) -> Result<i32, String> {
+    log::info!("save_anomaly {anomaly}");
+    let anomaly_parsed: Anomaly = serde_json::from_str(&anomaly).map_err(|err| err.to_string())?;
+    with_connection(state.inner(), |connection| {
+        database::save_anomaly(connection, &anomaly_parsed)
+    })
+}
+
+#[tauri::command]
+pub fn get_anomalies(state: State<AppConfigData>) -> Result<String, String> {
+    let anomalies = with_connection(state.inner(), database::get_all_anomalies)?;
+    to_json(&anomalies)
 }

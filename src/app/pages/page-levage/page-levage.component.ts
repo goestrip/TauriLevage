@@ -12,20 +12,19 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import { MatOptionModule } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
-import { FormEpiComponent } from '../../forms/form-epi/form-epi.component';
-
-import { Epi } from '../../model/epi';
 import { DataModelService } from '../../services/data-model.service';
 import { Criticity } from '../../model/criticity';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { EpiMateriel, LevageMateriel } from '../../model/catalogMateriel';
+import { LevageMateriel } from '../../model/catalogMateriel';
 import { Levage } from '../../model/levage';
 import { FormLevageComponent } from '../../forms/form-levage/form-levage.component';
+import { downloadCsv } from '../../model/csv';
+import { errorText } from '../../model/helpers';
 
 
 
 @Component({
-  selector: 'app-page-epi',
+  selector: 'app-page-levage',
   imports: [MatTableModule,
     MatFormFieldModule,
     FormsModule,
@@ -50,6 +49,7 @@ export class PageLevageComponent {
      'serial',
      'date_mise_en_service',
      'cmu_kg',
+     'longueur_m',
      'essai_charge',
      'assigned_to',
      'emplacement',
@@ -65,6 +65,7 @@ export class PageLevageComponent {
   levageData: MatTableDataSource<Levage>;
   levageMateriel: LevageMateriel[] = [];
   filter: string = '';
+  importStatus = '';
 
   editingRow: any = null;
   readonly dialog = inject(MatDialog); // Inject MatDialog
@@ -102,40 +103,23 @@ export class PageLevageComponent {
     });
 
 
-    dialogRef.afterClosed().subscribe((updatedLevage: Levage) => {
-      if (updatedLevage) {
-        levage.copyFrom(updatedLevage); // Update the EPI with the changes
-        this.saveRow(levage); // Save the updated EPI
+    dialogRef.afterClosed().subscribe(async (updatedLevage: Levage | null) => {
+      if (!updatedLevage) {
+        return;
+      }
+      levage.copyFrom(updatedLevage);
+      try {
+        await this.dataService.saveLevage(levage);
+      } catch (error) {
+        console.error(error);
+        alert(`Enregistrement impossible : ${errorText(error)}`);
+        await this.dataService.reloadDatabase();
       }
     });
   }
 
-  saveRow(levage: Levage): void {
-    this.dataService.saveLevage(levage); // Save the EPI to the data service
-  }
-
-  getValidityClass(epi: Epi): string {
-    if (!epi.validiteLimite) {
-      return '';
-    }
-    const twoMonthsBeforeLimit = new Date(epi.validiteLimite);
-    twoMonthsBeforeLimit.setMonth(twoMonthsBeforeLimit.getMonth() - 2);
-
-    const now = new Date();
-    
-    if (now >= twoMonthsBeforeLimit && now < epi.validiteLimite) {
-      return 'class-urgent';
-    }
-    else if (now >= epi.validiteLimite) {
-      return 'class-critical';
-    }
-    else{
-      return '';
-    }
-  }
-
-  getControlClass(epi: Epi): string {
-    const controlDates = epi.WarningControlDate;
+  getControlClass(item: { WarningControlDate: { warningDate: Date; overdueDate: Date } | null }): string {
+    const controlDates = item.WarningControlDate;
     if (controlDates) {
       const now = new Date();
       if (now >= controlDates.warningDate && now < controlDates.overdueDate) {
@@ -150,11 +134,6 @@ export class PageLevageComponent {
     }
   }
   
-  dateControl(epi: Epi): boolean {
-    epi.date_last_control
-    return true;
-  }
-
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.levageData.filter = filterValue.trim().toLowerCase();
@@ -173,14 +152,8 @@ export class PageLevageComponent {
     }
   }
 
-  isRebus(epi: Epi): boolean {
-    return epi.date_rebus !== null;
-  }
-
-  isRowRebus(rowData: any): boolean{
-    console.log(rowData);
-    return Math.random() < 0.5;
-    
+  isRebus(item: { date_rebus: Date | null }): boolean {
+    return item.date_rebus !== null;
   }
 
   getCriticityClass(epi: any): string {
@@ -198,22 +171,29 @@ export class PageLevageComponent {
     }
   }
 
-  importCsv() {
-    // Implement CSV import functionality here
-    console.log('Importing CSV...');
+  exportCsv(): void {
+    downloadCsv(`levage-${new Date().toISOString().slice(0, 10)}.csv`, this.dataService.exportLevageCsv());
   }
 
   handleFileInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const csvData = e.target?.result as string;
-        this.dataService.parseCsvData(csvData);
-      };
-      reader.readAsText(file);
+    const file = input.files?.[0];
+    if (!file) {
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const csvData = e.target?.result as string;
+      try {
+        const result = await this.dataService.importLevageCsv(csvData);
+        const details = result.errors.slice(0, 3).join(' ');
+        this.importStatus = `${result.imported} ligne(s) importée(s), ${result.skipped} ignorée(s). ${details}`.trim();
+      } catch (error) {
+        this.importStatus = `Import impossible : ${errorText(error)}`;
+      }
+      input.value = '';
+    };
+    reader.readAsText(file);
   }
   
 }

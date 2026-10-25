@@ -77,3 +77,14 @@
 .filter-container button {
     margin-left: 10px;
 }
+
+.import-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.import-status {
+    margin: 0 1em 8px;
+    text-align: left;
+}

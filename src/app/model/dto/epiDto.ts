@@ -2,11 +2,12 @@ import { Anomaly } from "../anomaly";
 import { EpiMateriel } from "../catalogMateriel";
 import { Emplacement } from "../emplacement";
 import { Epi } from "../epi";
+import { dateToMs, msToDate, toOptionalInt } from "../helpers";
 import { People } from "../people";
 
 
 export class EpiDto{
-    public id: number = 0;
+    public id: number | null = null;
     public nature_id: number = 0;
     public serial: string = '';;
     public date_fabrication: number = 0;
@@ -24,30 +25,30 @@ export class EpiDto{
             id: dto.id,
             serial: dto.serial,
             nature: materiels.find(m => m.id == dto.nature_id) || null,
-            date_fabrication: dto.date_fabrication ? new Date(dto.date_fabrication) : null,
-            date_mise_en_service: dto.date_mise_en_service ? new Date(dto.date_mise_en_service) : null,
+            date_fabrication: msToDate(dto.date_fabrication),
+            date_mise_en_service: msToDate(dto.date_mise_en_service),
             validite_years: dto.validite_years,
-            date_rebus: dto.date_rebus ? new Date(dto.date_rebus) : null,
+            date_rebus: msToDate(dto.date_rebus),
             assigned_to: employees.find(l => l.id == dto.assigned_to_id) || null,
             emplacement: locations.find(e => e.id == dto.emplacement_id) || null,
-            date_last_control: dto.date_last_control ? new Date(dto.date_last_control) : null,
+            date_last_control: msToDate(dto.date_last_control),
             anomaly: anomalies.find(a => a.id == dto.anomaly_id) || null,
        });
     }
 
     public static FromEpi( epi: Epi): EpiDto{
         return Object.assign(new EpiDto(),{
-            id: epi.id,
+            id: epi.id && epi.id > 0 ? epi.id : null,
             nature_id: epi.nature?.id || 0,
             serial: epi.serial,
-            date_fabrication: epi.date_fabrication ? epi.date_fabrication.getTime() : null,
-            date_mise_en_service: epi.date_mise_en_service ? epi.date_mise_en_service.getTime() : null,
-            validite_years: epi.validite_years? epi.validite_years : null,
+            date_fabrication: dateToMs(epi.date_fabrication),
+            date_mise_en_service: dateToMs(epi.date_mise_en_service),
+            validite_years: toOptionalInt(epi.validite_years),
             assigned_to_id: epi.assigned_to?.id || null,
             emplacement_id: epi.emplacement?.id || null,
-            date_last_control: epi.date_last_control ? epi.date_last_control.getTime() : null,
-            date_rebus: epi.date_rebus ? epi.date_rebus.getTime() : null,
-            anomaly_id: epi.anomaly?.id || null,
+            date_last_control: dateToMs(epi.date_last_control),
+            date_rebus: dateToMs(epi.date_rebus),
+            anomaly_id: epi.anomaly?.id && epi.anomaly.id > 0 ? epi.anomaly.id : null,
         });
     }
 }

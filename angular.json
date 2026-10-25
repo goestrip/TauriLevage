@@ -34,6 +34,13 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/@fontsource/roboto/latin-300.css",
+              "node_modules/@fontsource/roboto/latin-ext-300.css",
+              "node_modules/@fontsource/roboto/latin-400.css",
+              "node_modules/@fontsource/roboto/latin-ext-400.css",
+              "node_modules/@fontsource/roboto/latin-500.css",
+              "node_modules/@fontsource/roboto/latin-ext-500.css",
+              "src/styles/material-icons.css",
               "src/custom-theme.scss",
               "src/styles/colors.scss"
             ]
@@ -43,8 +50,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "1.5mb"
                 },
                 {
                   "type": "anyComponentStyle",

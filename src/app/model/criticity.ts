@@ -27,6 +27,42 @@ export function IntToCriticity(criticity: number): Criticity {
     return Criticity.NONE;
 }
 
+export function parseCriticity(value: string | null | undefined): Criticity {
+    if (!value) {
+        return Criticity.NONE;
+    }
+    const normalized = value.trim().toLowerCase();
+    switch (normalized) {
+        case '0':
+        case 'aucune':
+        case 'none':
+            return Criticity.NONE;
+        case '1':
+        case 'traité':
+        case 'traite':
+        case 'traitée':
+        case 'traitee':
+        case 'processed':
+            return Criticity.PROCESSED;
+        case '2':
+        case 'a traiter':
+        case 'à traiter':
+        case 'normal':
+            return Criticity.NORMAL;
+        case '3':
+        case 'urgent':
+            return Criticity.URGENT;
+        case '4':
+        case 'critique':
+        case 'critical':
+            return Criticity.CRITICAL;
+        default: {
+            const match = Object.values(Criticity).find((item) => item.toLowerCase() === normalized);
+            return match ?? Criticity.NONE;
+        }
+    }
+}
+
 export function RandomCriticity():Criticity{
     const random = Math.floor(Math.random() * 4);
     switch(random){
